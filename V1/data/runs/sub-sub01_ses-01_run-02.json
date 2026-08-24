@@ -1,0 +1,245 @@
+{
+  "run_id": "sub-sub01_ses-01_run-02",
+  "experiment": "inner_speech_v2",
+  "participant": "sub01",
+  "session": 1,
+  "run": 2,
+  "pilot": false,
+  "seed": 1641160119,
+  "started": "2026-08-23T22:41:32.529+00:00",
+  "aborted": true,
+  "config": {
+    "experiment": "inner_speech_v2",
+    "paths": {
+      "data_dir": "data",
+      "bank": "questions/bank.json",
+      "images_dir": "questions/images"
+    },
+    "window": {
+      "size": [
+        1280,
+        800
+      ],
+      "fullscreen": true,
+      "screen": 0,
+      "color": [
+        -1,
+        -1,
+        -1
+      ],
+      "units": "height",
+      "mouse_visible": false
+    },
+    "text": {
+      "font": "Arial",
+      "height": 0.06,
+      "wrap_width": 1.3,
+      "color": [
+        1,
+        1,
+        1
+      ],
+      "title_pos": [
+        0,
+        0.3
+      ]
+    },
+    "fixation": {
+      "text": "+",
+      "height": 0.08,
+      "color": [
+        1,
+        1,
+        1
+      ]
+    },
+    "cue": {
+      "height": 0.12,
+      "color": [
+        1,
+        1,
+        1
+      ]
+    },
+    "scanner": {
+      "tr": 0.8,
+      "trigger_key": "5",
+      "wait_for_triggers": 12,
+      "log_triggers": true
+    },
+    "run": {
+      "lead_in": 12.0,
+      "lead_out": 12.0,
+      "n_blocks": 10,
+      "trials_per_block": 10
+    },
+    "trial": {
+      "round_jitter_to_tr": true,
+      "phases": [
+        {
+          "name": "fixation_pre",
+          "show": "fixation",
+          "dur": [
+            2.0,
+            6.0
+          ],
+          "jitter": "exponential"
+        },
+        {
+          "name": "question",
+          "show": "question",
+          "dur": 4.0
+        },
+        {
+          "name": "blank",
+          "show": "blank",
+          "dur": 1.0
+        },
+        {
+          "name": "answer",
+          "show": "cue",
+          "dur": 3.0
+        },
+        {
+          "name": "fixation_post",
+          "show": "fixation",
+          "dur": [
+            2.0,
+            6.0
+          ],
+          "jitter": "exponential"
+        }
+      ]
+    },
+    "conditions": {
+      "primary": {
+        "per_run": 80,
+        "cue": "●",
+        "show_question": true,
+        "response": "answer"
+      },
+      "passive_read": {
+        "per_run": 5,
+        "cue": "○",
+        "show_question": true,
+        "response": "none"
+      },
+      "cue_only": {
+        "per_run": 5,
+        "cue": "◆",
+        "show_question": false,
+        "response": "answer",
+        "cue_from_response": true
+      },
+      "constant_word": {
+        "per_run": 5,
+        "cue": "▲",
+        "show_question": true,
+        "response": "ready"
+      },
+      "opposite": {
+        "per_run": 5,
+        "cue": "✖",
+        "show_question": true,
+        "response": "opposite"
+      }
+    },
+    "keys": {
+      "quit": [
+        "escape"
+      ],
+      "advance": [
+        "space"
+      ]
+    },
+    "instructions": "When the answer cue appears, silently repeat the correct answer - yes or no -\nthroughout the entire three-second window at a steady, comfortable cadence.\n\nKeep your jaw, tongue, and lips still.\nWhen the cue disappears, stop repeating the word and return to fixation.\n\nPress SPACE when you are ready.\n"
+  },
+  "trials": [
+    {
+      "question_uuid": "0ee7365d-9363-57a7-98e9-1d391d399c4f",
+      "category": "general_knowledge",
+      "family": "gk_paris",
+      "view": "text",
+      "text": "Is Paris in Brazil?",
+      "params": {},
+      "answer": "no",
+      "condition": "primary",
+      "response_token": "no",
+      "cue": "●",
+      "show_question": true,
+      "durations": {
+        "fixation_pre": 2.4,
+        "question": 4.0,
+        "blank": 1.0,
+        "answer": 3.0,
+        "fixation_post": 3.2
+      },
+      "block": 0,
+      "index_in_block": 0,
+      "trial": 0,
+      "t_start": 12.0,
+      "onsets": {
+        "fixation_pre": 12.0104,
+        "question": 14.4093,
+        "blank": 18.4093,
+        "answer": 19.4093,
+        "fixation_post": 22.4093
+      },
+      "offsets": {
+        "fixation_pre": 14.3927,
+        "question": 18.3927,
+        "blank": 19.3928,
+        "answer": 22.3927,
+        "fixation_post": 25.5927
+      },
+      "t_end": 25.6
+    },
+    {
+      "question_uuid": "c06ef684-dc9b-52d3-a970-1837ab6fd5c6",
+      "category": "arithmetic",
+      "family": "arith_a",
+      "view": "text",
+      "text": "Is six a multiple of three?",
+      "params": {},
+      "answer": "yes",
+      "condition": "primary",
+      "response_token": "yes",
+      "cue": "●",
+      "show_question": true,
+      "durations": {
+        "fixation_pre": 2.4,
+        "question": 4.0,
+        "blank": 1.0,
+        "answer": 3.0,
+        "fixation_post": 2.4
+      },
+      "block": 0,
+      "index_in_block": 1,
+      "trial": 1,
+      "t_start": 25.6,
+      "onsets": {
+        "fixation_pre": 25.6094,
+        "question": 28.0101,
+        "blank": 32.0102,
+        "answer": 33.0101,
+        "fixation_post": 36.0102
+      },
+      "offsets": {
+        "fixation_pre": 27.9934,
+        "question": 31.9934,
+        "blank": 32.9937,
+        "answer": 35.9934,
+        "fixation_post": 38.3928
+      },
+      "t_end": 38.4
+    }
+  ],
+  "questions_reused": 20,
+  "t0_monotonic": 22.898699,
+  "duration": 40.7611,
+  "ended": "2026-08-23T22:42:32.818+00:00",
+  "trigger_times": [
+    0.1766
+  ],
+  "n_triggers": 1
+}

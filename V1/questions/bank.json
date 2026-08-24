@@ -1,0 +1,1016 @@
+[
+  {
+    "uuid": "0e2054e5-a4c8-50a4-8aa0-8184b75ad0b7",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the triangle above the square?",
+    "answer": "yes",
+    "family": "relpos_triangle_square",
+    "params": {
+      "shapes": [
+        {
+          "kind": "triangle",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "7eccd88b-6149-5eec-b319-bee95a9e365a",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the square above the triangle?",
+    "answer": "no",
+    "family": "relpos_triangle_square",
+    "params": {
+      "shapes": [
+        {
+          "kind": "triangle",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "83d0cabe-ff16-5f27-b63a-6facda8ff20f",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the square below the triangle?",
+    "answer": "yes",
+    "family": "relpos_triangle_square",
+    "params": {
+      "shapes": [
+        {
+          "kind": "triangle",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "d7a59d99-0c3d-566d-a98f-4ec904398cf1",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the triangle below the square?",
+    "answer": "no",
+    "family": "relpos_triangle_square",
+    "params": {
+      "shapes": [
+        {
+          "kind": "triangle",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "5b363071-0d90-52aa-842d-b8f8780910a6",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the circle above the triangle?",
+    "answer": "yes",
+    "family": "relpos_circle_triangle",
+    "params": {
+      "shapes": [
+        {
+          "kind": "circle",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "triangle",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "f2792cb6-d598-5f73-8cef-0dfac7eae7e0",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the triangle above the circle?",
+    "answer": "no",
+    "family": "relpos_circle_triangle",
+    "params": {
+      "shapes": [
+        {
+          "kind": "circle",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "triangle",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "54215c3d-0670-5297-8d42-9eb63394aea2",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the triangle below the circle?",
+    "answer": "yes",
+    "family": "relpos_circle_triangle",
+    "params": {
+      "shapes": [
+        {
+          "kind": "circle",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "triangle",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "fa7386e8-d0cf-5f1b-94c9-87535f8b3fea",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the circle below the triangle?",
+    "answer": "no",
+    "family": "relpos_circle_triangle",
+    "params": {
+      "shapes": [
+        {
+          "kind": "circle",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "triangle",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "7d556dd7-2b56-56f0-83c6-81562cfcb193",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the square above the circle?",
+    "answer": "yes",
+    "family": "relpos_square_circle",
+    "params": {
+      "shapes": [
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "circle",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "5ecea0c7-1568-5a70-b5d8-932d73f798e2",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the circle above the square?",
+    "answer": "no",
+    "family": "relpos_square_circle",
+    "params": {
+      "shapes": [
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "circle",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "32f15067-598a-54ac-bb33-72df7aba1c83",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the circle below the square?",
+    "answer": "yes",
+    "family": "relpos_square_circle",
+    "params": {
+      "shapes": [
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "circle",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "219543fd-bb77-51a9-85c2-406ea1a99428",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the square below the circle?",
+    "answer": "no",
+    "family": "relpos_square_circle",
+    "params": {
+      "shapes": [
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "circle",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "803c3fac-c863-50e9-8298-d1755288fd0c",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the diamond above the square?",
+    "answer": "yes",
+    "family": "relpos_diamond_square",
+    "params": {
+      "shapes": [
+        {
+          "kind": "diamond",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "e9866a14-6902-54df-841b-3c8e43a358be",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the square above the diamond?",
+    "answer": "no",
+    "family": "relpos_diamond_square",
+    "params": {
+      "shapes": [
+        {
+          "kind": "diamond",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "8e8713c6-67df-504c-a58d-ce580a35ad2a",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the square below the diamond?",
+    "answer": "yes",
+    "family": "relpos_diamond_square",
+    "params": {
+      "shapes": [
+        {
+          "kind": "diamond",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "c1cfc55a-2012-5b23-a451-b9c1219d4850",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the diamond below the square?",
+    "answer": "no",
+    "family": "relpos_diamond_square",
+    "params": {
+      "shapes": [
+        {
+          "kind": "diamond",
+          "pos": [
+            0.0,
+            0.06
+          ]
+        },
+        {
+          "kind": "square",
+          "pos": [
+            0.0,
+            -0.16
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "3fb3d100-7d63-517b-bd59-576c44feefaf",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the circle left of the square?",
+    "answer": "yes",
+    "family": "relside_circle_square",
+    "params": {
+      "shapes": [
+        {
+          "kind": "circle",
+          "pos": [
+            -0.16,
+            -0.05
+          ]
+        },
+        {
+          "kind": "square",
+          "pos": [
+            0.16,
+            -0.05
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "4b9b6b6c-ff3b-594c-8094-0fb82b31737f",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the square left of the circle?",
+    "answer": "no",
+    "family": "relside_circle_square",
+    "params": {
+      "shapes": [
+        {
+          "kind": "circle",
+          "pos": [
+            -0.16,
+            -0.05
+          ]
+        },
+        {
+          "kind": "square",
+          "pos": [
+            0.16,
+            -0.05
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "66f5eb62-b0cc-5aed-8c7a-479c0d4a5b4f",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the triangle left of the diamond?",
+    "answer": "yes",
+    "family": "relside_triangle_diamond",
+    "params": {
+      "shapes": [
+        {
+          "kind": "triangle",
+          "pos": [
+            -0.16,
+            -0.05
+          ]
+        },
+        {
+          "kind": "diamond",
+          "pos": [
+            0.16,
+            -0.05
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "18ea5a12-cb08-5409-97d5-9781bd73f32a",
+    "category": "perceptual_relational",
+    "view": "shapes",
+    "text": "Is the diamond left of the triangle?",
+    "answer": "no",
+    "family": "relside_triangle_diamond",
+    "params": {
+      "shapes": [
+        {
+          "kind": "triangle",
+          "pos": [
+            -0.16,
+            -0.05
+          ]
+        },
+        {
+          "kind": "diamond",
+          "pos": [
+            0.16,
+            -0.05
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "d0971058-fe1f-555e-9661-ad3a5d5c0738",
+    "category": "learned_facts",
+    "view": "text",
+    "text": "Was Zorp assigned to group B?",
+    "answer": "yes",
+    "family": "learned_zorp"
+  },
+  {
+    "uuid": "33b089dd-371a-54fd-b869-ebbef867fcbe",
+    "category": "learned_facts",
+    "view": "text",
+    "text": "Was Zorp assigned to group A?",
+    "answer": "no",
+    "family": "learned_zorp"
+  },
+  {
+    "uuid": "e9f4de8e-4d95-58b1-81ae-17532ce2d079",
+    "category": "learned_facts",
+    "view": "text",
+    "text": "Was Fenlo assigned to group A?",
+    "answer": "yes",
+    "family": "learned_fenlo"
+  },
+  {
+    "uuid": "cb288955-eb2a-522d-b83b-c1504ea92daa",
+    "category": "learned_facts",
+    "view": "text",
+    "text": "Was Fenlo assigned to group B?",
+    "answer": "no",
+    "family": "learned_fenlo"
+  },
+  {
+    "uuid": "fa05f52c-2e0d-5ac4-8c6c-0cf51e84d71e",
+    "category": "learned_facts",
+    "view": "text",
+    "text": "Does Brill belong to the blue set?",
+    "answer": "yes",
+    "family": "learned_brill"
+  },
+  {
+    "uuid": "e3e0e8e2-b06f-5c11-af03-e279559f6fd9",
+    "category": "learned_facts",
+    "view": "text",
+    "text": "Does Brill belong to the red set?",
+    "answer": "no",
+    "family": "learned_brill"
+  },
+  {
+    "uuid": "f6a0ccd2-c10c-53e8-b149-07c699fc7a90",
+    "category": "learned_facts",
+    "view": "text",
+    "text": "Does Marn belong to the red set?",
+    "answer": "yes",
+    "family": "learned_marn"
+  },
+  {
+    "uuid": "596a49c7-2a2e-5905-b045-574834891cac",
+    "category": "learned_facts",
+    "view": "text",
+    "text": "Does Marn belong to the blue set?",
+    "answer": "no",
+    "family": "learned_marn"
+  },
+  {
+    "uuid": "c518b9c1-1e52-515e-86cf-1b164034c6ca",
+    "category": "recognition_memory",
+    "view": "text",
+    "text": "Was copper in the preceding list?",
+    "answer": "yes",
+    "family": "recog_copper"
+  },
+  {
+    "uuid": "e681f781-fb8a-51c0-b1e9-f820444f9918",
+    "category": "recognition_memory",
+    "view": "text",
+    "text": "Was silver in the preceding list?",
+    "answer": "no",
+    "family": "recog_silver"
+  },
+  {
+    "uuid": "05ae3ee4-fed1-5d2f-a983-7a53bc114cef",
+    "category": "recognition_memory",
+    "view": "text",
+    "text": "Was maple in the preceding list?",
+    "answer": "yes",
+    "family": "recog_maple"
+  },
+  {
+    "uuid": "5e016d80-9f40-5dfb-9c99-1a38ee8ab544",
+    "category": "recognition_memory",
+    "view": "text",
+    "text": "Was cedar in the preceding list?",
+    "answer": "no",
+    "family": "recog_cedar"
+  },
+  {
+    "uuid": "c0bd5007-07ab-59ac-8168-b1ce1ebe11bb",
+    "category": "recognition_memory",
+    "view": "text",
+    "text": "Did the list contain violet?",
+    "answer": "yes",
+    "family": "recog_the"
+  },
+  {
+    "uuid": "85f709f0-a4f1-570a-82b9-9dc281b90340",
+    "category": "recognition_memory",
+    "view": "text",
+    "text": "Did the list contain amber?",
+    "answer": "no",
+    "family": "recog_the"
+  },
+  {
+    "uuid": "d6ed31c1-1d88-5eb6-b99d-2e1fcabcc9a8",
+    "category": "category_property",
+    "view": "text",
+    "text": "Is a sparrow a bird?",
+    "answer": "yes",
+    "family": "cat_sparrow"
+  },
+  {
+    "uuid": "e45c8d53-43b9-5a0a-a1f7-3cac177370bb",
+    "category": "category_property",
+    "view": "text",
+    "text": "Is a sparrow a fish?",
+    "answer": "no",
+    "family": "cat_sparrow"
+  },
+  {
+    "uuid": "1b5539ab-c76d-5ae8-b6f2-499b521d7f37",
+    "category": "category_property",
+    "view": "text",
+    "text": "Is a salmon a fish?",
+    "answer": "yes",
+    "family": "cat_salmon"
+  },
+  {
+    "uuid": "2932fa99-898b-5215-9e2c-f78d36ad55ad",
+    "category": "category_property",
+    "view": "text",
+    "text": "Is a salmon a bird?",
+    "answer": "no",
+    "family": "cat_salmon"
+  },
+  {
+    "uuid": "4847c260-3835-51cb-bd6a-e5da57175266",
+    "category": "category_property",
+    "view": "text",
+    "text": "Is a hammer a tool?",
+    "answer": "yes",
+    "family": "cat_hammer"
+  },
+  {
+    "uuid": "18d048ed-fb4e-56b3-be74-eb363ad6e7d2",
+    "category": "category_property",
+    "view": "text",
+    "text": "Is a hammer a fruit?",
+    "answer": "no",
+    "family": "cat_hammer"
+  },
+  {
+    "uuid": "a01ce7ad-202d-5422-88a3-79bf32a4255c",
+    "category": "category_property",
+    "view": "text",
+    "text": "Is a plum a fruit?",
+    "answer": "yes",
+    "family": "cat_plum"
+  },
+  {
+    "uuid": "c0166a12-ab8a-5341-8124-f1c71f4f02ed",
+    "category": "category_property",
+    "view": "text",
+    "text": "Is a plum a tool?",
+    "answer": "no",
+    "family": "cat_plum"
+  },
+  {
+    "uuid": "dccc467e-55e0-520f-9f7a-17b92a12337e",
+    "category": "category_property",
+    "view": "text",
+    "text": "Is a cello a musical instrument?",
+    "answer": "yes",
+    "family": "cat_cello"
+  },
+  {
+    "uuid": "5324d354-2711-59b4-b240-6877c2784942",
+    "category": "category_property",
+    "view": "text",
+    "text": "Is a cello a vegetable?",
+    "answer": "no",
+    "family": "cat_cello"
+  },
+  {
+    "uuid": "adf04ae5-a5b3-5115-999e-80ed79c4b4a9",
+    "category": "arithmetic",
+    "view": "text",
+    "text": "Is fourteen even?",
+    "answer": "yes",
+    "family": "arith_even"
+  },
+  {
+    "uuid": "b66d4677-1f4c-5aa4-98c8-778c1afdb5b9",
+    "category": "arithmetic",
+    "view": "text",
+    "text": "Is fifteen even?",
+    "answer": "no",
+    "family": "arith_even"
+  },
+  {
+    "uuid": "06387d4f-4670-5733-a34f-d04131ebd5f7",
+    "category": "arithmetic",
+    "view": "text",
+    "text": "Is nine odd?",
+    "answer": "yes",
+    "family": "arith_odd"
+  },
+  {
+    "uuid": "2d0c9a31-11f1-58f6-b1ef-038efb365c63",
+    "category": "arithmetic",
+    "view": "text",
+    "text": "Is eight odd?",
+    "answer": "no",
+    "family": "arith_odd"
+  },
+  {
+    "uuid": "e207e39a-4b74-5a85-bb2a-649f6a6af3da",
+    "category": "arithmetic",
+    "view": "text",
+    "text": "Is twelve greater than seven?",
+    "answer": "yes",
+    "family": "arith_greater"
+  },
+  {
+    "uuid": "05e27aa7-d4df-51e5-9361-605b9b35d544",
+    "category": "arithmetic",
+    "view": "text",
+    "text": "Is five greater than eleven?",
+    "answer": "no",
+    "family": "arith_greater"
+  },
+  {
+    "uuid": "66c0eff0-7629-5349-b2d5-9b1b718815df",
+    "category": "arithmetic",
+    "view": "text",
+    "text": "Is twenty less than thirty?",
+    "answer": "yes",
+    "family": "arith_less"
+  },
+  {
+    "uuid": "a1f6ceeb-8521-536c-a689-9cf992bcd39d",
+    "category": "arithmetic",
+    "view": "text",
+    "text": "Is forty less than thirteen?",
+    "answer": "no",
+    "family": "arith_less"
+  },
+  {
+    "uuid": "c06ef684-dc9b-52d3-a970-1837ab6fd5c6",
+    "category": "arithmetic",
+    "view": "text",
+    "text": "Is six a multiple of three?",
+    "answer": "yes",
+    "family": "arith_a"
+  },
+  {
+    "uuid": "4660f95b-1d15-5107-8ca4-0193ef3648dc",
+    "category": "arithmetic",
+    "view": "text",
+    "text": "Is seven a multiple of three?",
+    "answer": "no",
+    "family": "arith_a"
+  },
+  {
+    "uuid": "747a94ea-fb1b-57ff-9197-e90339709e31",
+    "category": "logic",
+    "view": "text",
+    "text": "If A precedes B, is B after A?",
+    "answer": "yes",
+    "family": "logic_A"
+  },
+  {
+    "uuid": "16e8aa84-f85b-5e9d-a55f-c746d0ffc693",
+    "category": "logic",
+    "view": "text",
+    "text": "If A precedes B, is B before A?",
+    "answer": "no",
+    "family": "logic_A"
+  },
+  {
+    "uuid": "8477938b-2659-5155-a319-29499ed574f3",
+    "category": "logic",
+    "view": "text",
+    "text": "If X is inside Y, does Y contain X?",
+    "answer": "yes",
+    "family": "logic_X"
+  },
+  {
+    "uuid": "8b5e3283-eb2d-566c-8cfd-1063ad5ae318",
+    "category": "logic",
+    "view": "text",
+    "text": "If X is inside Y, does X contain Y?",
+    "answer": "no",
+    "family": "logic_X"
+  },
+  {
+    "uuid": "1825fe45-8ca4-548f-9d5f-4ed957ed346e",
+    "category": "logic",
+    "view": "text",
+    "text": "If P is larger than Q, is Q smaller than P?",
+    "answer": "yes",
+    "family": "logic_P"
+  },
+  {
+    "uuid": "9f0d720c-99b5-5cae-b7e6-fbb1c85893e4",
+    "category": "logic",
+    "view": "text",
+    "text": "If P is larger than Q, is Q larger than P?",
+    "answer": "no",
+    "family": "logic_P"
+  },
+  {
+    "uuid": "328cd030-6bbe-52a8-bb5f-668c646024fd",
+    "category": "linguistic",
+    "view": "text",
+    "text": "Does cat rhyme with hat?",
+    "answer": "yes",
+    "family": "ling_cat"
+  },
+  {
+    "uuid": "ffec453f-c90a-546f-991d-0cb2cf30cf56",
+    "category": "linguistic",
+    "view": "text",
+    "text": "Does cat rhyme with dog?",
+    "answer": "no",
+    "family": "ling_cat"
+  },
+  {
+    "uuid": "5d8022ed-ea16-56a0-9ed9-0b7cbb9ba793",
+    "category": "linguistic",
+    "view": "text",
+    "text": "Does stone rhyme with bone?",
+    "answer": "yes",
+    "family": "ling_stone"
+  },
+  {
+    "uuid": "ab4f53d1-9b1f-5711-b41b-9216e2b5ed3a",
+    "category": "linguistic",
+    "view": "text",
+    "text": "Does stone rhyme with brick?",
+    "answer": "no",
+    "family": "ling_stone"
+  },
+  {
+    "uuid": "12e02771-cbe2-5d32-9d2e-e4886d38972e",
+    "category": "linguistic",
+    "view": "text",
+    "text": "Does the word garden start with G?",
+    "answer": "yes",
+    "family": "ling_the"
+  },
+  {
+    "uuid": "9f2139f5-e94a-526e-9fa0-b44eabc4949d",
+    "category": "linguistic",
+    "view": "text",
+    "text": "Does the word garden start with P?",
+    "answer": "no",
+    "family": "ling_the"
+  },
+  {
+    "uuid": "22b7f061-5d6f-5ac0-99a4-671b76a307c2",
+    "category": "linguistic",
+    "view": "text",
+    "text": "Does the word river end with R?",
+    "answer": "yes",
+    "family": "ling_the"
+  },
+  {
+    "uuid": "32068985-0021-580c-810a-be49830cc813",
+    "category": "linguistic",
+    "view": "text",
+    "text": "Does the word river end with M?",
+    "answer": "no",
+    "family": "ling_the"
+  },
+  {
+    "uuid": "249578e2-3647-5e79-9b23-fab6fea74bc9",
+    "category": "general_knowledge",
+    "view": "text",
+    "text": "Does Earth orbit the Sun?",
+    "answer": "yes",
+    "family": "gk_earth"
+  },
+  {
+    "uuid": "f11bffcf-656c-5823-a49a-474bc04ac80f",
+    "category": "general_knowledge",
+    "view": "text",
+    "text": "Does the Sun orbit Earth?",
+    "answer": "no",
+    "family": "gk_the"
+  },
+  {
+    "uuid": "880cbe92-907f-5da6-8258-b1e6c879a5b8",
+    "category": "general_knowledge",
+    "view": "text",
+    "text": "Is water wet?",
+    "answer": "yes",
+    "family": "gk_water"
+  },
+  {
+    "uuid": "c6d26b65-9c43-563c-b95d-d7c8db9bb4e9",
+    "category": "general_knowledge",
+    "view": "text",
+    "text": "Is fire wet?",
+    "answer": "no",
+    "family": "gk_fire"
+  },
+  {
+    "uuid": "bc7d5a34-087d-5c65-be73-9ce45f388bb6",
+    "category": "general_knowledge",
+    "view": "text",
+    "text": "Do birds have feathers?",
+    "answer": "yes",
+    "family": "gk_birds"
+  },
+  {
+    "uuid": "5cbb757d-0d3d-505c-a1a4-f96f3687d6e2",
+    "category": "general_knowledge",
+    "view": "text",
+    "text": "Do birds have scales?",
+    "answer": "no",
+    "family": "gk_birds"
+  },
+  {
+    "uuid": "19fdb382-0b07-546d-a91d-df7eb6975240",
+    "category": "general_knowledge",
+    "view": "text",
+    "text": "Is Paris in France?",
+    "answer": "yes",
+    "family": "gk_paris"
+  },
+  {
+    "uuid": "0ee7365d-9363-57a7-98e9-1d391d399c4f",
+    "category": "general_knowledge",
+    "view": "text",
+    "text": "Is Paris in Brazil?",
+    "answer": "no",
+    "family": "gk_paris"
+  },
+  {
+    "uuid": "cddb104d-5588-55a0-ba15-5fe6d4acb2bb",
+    "category": "general_knowledge",
+    "view": "text",
+    "text": "Does ice float on water?",
+    "answer": "yes",
+    "family": "gk_ice"
+  },
+  {
+    "uuid": "5f7a59df-8067-513f-898d-d7357ff70421",
+    "category": "general_knowledge",
+    "view": "text",
+    "text": "Does ice sink in water?",
+    "answer": "no",
+    "family": "gk_ice"
+  },
+  {
+    "uuid": "79c57476-b6cd-58f1-9700-229736a8d5bf",
+    "category": "image_probe",
+    "view": "image",
+    "text": "Is the pictured object an animal?",
+    "answer": "yes",
+    "family": "img_sparrow",
+    "params": {
+      "image": "sparrow.png",
+      "size": [
+        0.35,
+        0.35
+      ]
+    }
+  },
+  {
+    "uuid": "20b208bf-feca-5970-a197-550b897f5255",
+    "category": "image_probe",
+    "view": "image",
+    "text": "Is the pictured object an animal?",
+    "answer": "no",
+    "family": "img_wrench",
+    "params": {
+      "image": "wrench.png",
+      "size": [
+        0.35,
+        0.35
+      ]
+    }
+  }
+]
