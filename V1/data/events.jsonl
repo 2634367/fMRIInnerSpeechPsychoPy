@@ -29,3 +29,76 @@
 {"ts": "2026-08-23T22:42:30.449+00:00", "run_id": "sub-sub01_ses-01_run-02", "kind": "phase", "trial": 1, "phase": "fixation_post", "onset": 36.0102, "offset": 38.3928, "question_uuid": "c06ef684-dc9b-52d3-a970-1837ab6fd5c6", "condition": "primary", "answer": "yes", "response_token": "yes"}
 {"ts": "2026-08-23T22:42:32.818+00:00", "run_id": "sub-sub01_ses-01_run-02", "kind": "aborted", "t": 40.7611}
 {"ts": "2026-08-23T22:42:32.820+00:00", "run_id": "sub-sub01_ses-01_run-02", "kind": "run_written", "path": "/Users/morpheous/WORKSPACE/PROJECTS/fMRI/InnerSpeechPsychoPyV2/data/runs/sub-sub01_ses-01_run-02.json", "n_trials": 2}
+{"ts": "2026-08-25T00:09:23.525+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "run_built", "n_trials": 20, "reused": 0, "seed": 1562890917}
+{"ts": "2026-08-25T00:09:28.922+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 1}
+{"ts": "2026-08-25T00:09:29.072+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 2}
+{"ts": "2026-08-25T00:09:29.206+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 3}
+{"ts": "2026-08-25T00:09:29.322+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 4}
+{"ts": "2026-08-25T00:09:29.489+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 5}
+{"ts": "2026-08-25T00:09:29.639+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 6}
+{"ts": "2026-08-25T00:09:29.758+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 7}
+{"ts": "2026-08-25T00:09:29.889+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 8}
+{"ts": "2026-08-25T00:09:29.989+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 9}
+{"ts": "2026-08-25T00:09:30.105+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 10}
+{"ts": "2026-08-25T00:09:30.305+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 11}
+{"ts": "2026-08-25T00:09:30.439+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "dummy_trigger", "index": 12}
+{"ts": "2026-08-25T00:09:30.439+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "scan_start", "t": 0.0, "simulated": false, "pulses": 12, "t0_monotonic": 17.400903}
+{"ts": "2026-08-25T00:09:42.438+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "lead_in", "onset": 0.0, "offset": 12.0}
+{"ts": "2026-08-25T00:09:44.838+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "phase", "trial": 0, "phase": "fixation_pre", "onset": 12.0225, "offset": 14.4059, "question_uuid": "ab4f53d1-9b1f-5711-b41b-9216e2b5ed3a", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:09:48.838+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "phase", "trial": 0, "phase": "question", "onset": 14.4224, "offset": 18.4059, "question_uuid": "ab4f53d1-9b1f-5711-b41b-9216e2b5ed3a", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:10:03.238+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "phase", "trial": 0, "phase": "rest", "onset": 18.4224, "offset": 32.8059, "question_uuid": "ab4f53d1-9b1f-5711-b41b-9216e2b5ed3a", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:10:06.238+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "phase", "trial": 0, "phase": "answer_cue", "onset": 32.8225, "offset": 35.8059, "question_uuid": "ab4f53d1-9b1f-5711-b41b-9216e2b5ed3a", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:10:23.038+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "phase", "trial": 0, "phase": "fixation_post", "onset": 35.8226, "offset": 52.6059, "question_uuid": "ab4f53d1-9b1f-5711-b41b-9216e2b5ed3a", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:10:26.238+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "phase", "trial": 1, "phase": "fixation_pre", "onset": 52.6225, "offset": 55.8059, "question_uuid": "18ea5a12-cb08-5409-97d5-9781bd73f32a", "condition": "cue_only", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:10:30.238+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "phase", "trial": 1, "phase": "question", "onset": 55.8225, "offset": 59.8059, "question_uuid": "18ea5a12-cb08-5409-97d5-9781bd73f32a", "condition": "cue_only", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:10:42.238+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "phase", "trial": 1, "phase": "rest", "onset": 59.8224, "offset": 71.806, "question_uuid": "18ea5a12-cb08-5409-97d5-9781bd73f32a", "condition": "cue_only", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:10:45.238+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "phase", "trial": 1, "phase": "answer_cue", "onset": 71.8226, "offset": 74.806, "question_uuid": "18ea5a12-cb08-5409-97d5-9781bd73f32a", "condition": "cue_only", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:10:59.938+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "aborted", "t": 89.5064}
+{"ts": "2026-08-25T00:10:59.941+00:00", "run_id": "sub-sub01_ses-01_run-03", "kind": "run_written", "path": "/Users/morpheous/WORKSPACE/PROJECTS/fMRI/InnerSpeech/PsychoPy/V1/data/runs/sub-sub01_ses-01_run-03.json", "n_trials": 1}
+{"ts": "2026-08-25T00:14:36.607+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "run_built", "n_trials": 20, "reused": 0, "seed": 1605383962}
+{"ts": "2026-08-25T00:15:44.612+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 1}
+{"ts": "2026-08-25T00:15:44.745+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 2}
+{"ts": "2026-08-25T00:15:44.879+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 3}
+{"ts": "2026-08-25T00:15:44.962+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 4}
+{"ts": "2026-08-25T00:15:45.078+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 5}
+{"ts": "2026-08-25T00:15:45.212+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 6}
+{"ts": "2026-08-25T00:15:45.712+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 7}
+{"ts": "2026-08-25T00:15:45.878+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 8}
+{"ts": "2026-08-25T00:15:45.995+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 9}
+{"ts": "2026-08-25T00:15:46.345+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 10}
+{"ts": "2026-08-25T00:15:46.495+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 11}
+{"ts": "2026-08-25T00:15:46.845+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "dummy_trigger", "index": 12}
+{"ts": "2026-08-25T00:15:46.845+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "scan_start", "t": 0.0, "simulated": false, "pulses": 12, "t0_monotonic": 78.328988}
+{"ts": "2026-08-25T00:15:58.828+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "lead_in", "onset": 0.0, "offset": 12.0}
+{"ts": "2026-08-25T00:16:01.228+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "phase", "trial": 0, "phase": "fixation_pre", "onset": 12.0145, "offset": 14.3977, "question_uuid": "8b5e3283-eb2d-566c-8cfd-1063ad5ae318", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:16:05.228+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "phase", "trial": 0, "phase": "question", "onset": 14.4145, "offset": 18.3977, "question_uuid": "8b5e3283-eb2d-566c-8cfd-1063ad5ae318", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:16:17.228+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "phase", "trial": 0, "phase": "rest", "onset": 18.4143, "offset": 30.3977, "question_uuid": "8b5e3283-eb2d-566c-8cfd-1063ad5ae318", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:16:32.428+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "phase", "trial": 0, "phase": "fixation_post", "onset": 30.4143, "offset": 45.5977, "question_uuid": "8b5e3283-eb2d-566c-8cfd-1063ad5ae318", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:16:37.228+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "phase", "trial": 1, "phase": "fixation_pre", "onset": 45.6145, "offset": 50.3978, "question_uuid": "8e8713c6-67df-504c-a58d-ce580a35ad2a", "condition": "primary", "answer": "yes", "response_token": "yes"}
+{"ts": "2026-08-25T00:16:41.228+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "phase", "trial": 1, "phase": "question", "onset": 50.4144, "offset": 54.3978, "question_uuid": "8e8713c6-67df-504c-a58d-ce580a35ad2a", "condition": "primary", "answer": "yes", "response_token": "yes"}
+{"ts": "2026-08-25T00:16:54.028+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "phase", "trial": 1, "phase": "rest", "onset": 54.4144, "offset": 67.1978, "question_uuid": "8e8713c6-67df-504c-a58d-ce580a35ad2a", "condition": "primary", "answer": "yes", "response_token": "yes"}
+{"ts": "2026-08-25T00:16:55.595+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "aborted", "t": 68.765}
+{"ts": "2026-08-25T00:16:55.597+00:00", "run_id": "sub-sub01_ses-01_run-04", "kind": "run_written", "path": "/Users/morpheous/WORKSPACE/PROJECTS/fMRI/InnerSpeech/PsychoPy/V1/data/runs/sub-sub01_ses-01_run-04.json", "n_trials": 1}
+{"ts": "2026-08-25T00:48:24.664+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "run_built", "n_trials": 20, "reused": 0, "seed": 1682188484}
+{"ts": "2026-08-25T00:48:30.865+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 1}
+{"ts": "2026-08-25T00:48:31.048+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 2}
+{"ts": "2026-08-25T00:48:31.281+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 3}
+{"ts": "2026-08-25T00:48:31.448+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 4}
+{"ts": "2026-08-25T00:48:31.615+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 5}
+{"ts": "2026-08-25T00:48:31.748+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 6}
+{"ts": "2026-08-25T00:48:31.881+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 7}
+{"ts": "2026-08-25T00:48:32.031+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 8}
+{"ts": "2026-08-25T00:48:32.165+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 9}
+{"ts": "2026-08-25T00:48:32.281+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 10}
+{"ts": "2026-08-25T00:48:32.448+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 11}
+{"ts": "2026-08-25T00:48:32.914+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "dummy_trigger", "index": 12}
+{"ts": "2026-08-25T00:48:32.914+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "scan_start", "t": 0.0, "simulated": false, "pulses": 12, "t0_monotonic": 16.992891}
+{"ts": "2026-08-25T00:48:44.897+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "lead_in", "onset": 0.0, "offset": 12.0}
+{"ts": "2026-08-25T00:48:47.297+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "phase", "trial": 0, "phase": "fixation_pre", "onset": 12.0112, "offset": 14.3946, "question_uuid": "bc7d5a34-087d-5c65-be73-9ce45f388bb6", "condition": "primary", "answer": "yes", "response_token": "yes"}
+{"ts": "2026-08-25T00:48:51.297+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "phase", "trial": 0, "phase": "question", "onset": 14.4112, "offset": 18.3948, "question_uuid": "bc7d5a34-087d-5c65-be73-9ce45f388bb6", "condition": "primary", "answer": "yes", "response_token": "yes"}
+{"ts": "2026-08-25T00:49:04.097+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "phase", "trial": 0, "phase": "rest", "onset": 18.4113, "offset": 31.1947, "question_uuid": "bc7d5a34-087d-5c65-be73-9ce45f388bb6", "condition": "primary", "answer": "yes", "response_token": "yes"}
+{"ts": "2026-08-25T00:49:23.297+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "phase", "trial": 0, "phase": "fixation_post", "onset": 31.2114, "offset": 50.3949, "question_uuid": "bc7d5a34-087d-5c65-be73-9ce45f388bb6", "condition": "primary", "answer": "yes", "response_token": "yes"}
+{"ts": "2026-08-25T00:49:26.497+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "phase", "trial": 1, "phase": "fixation_pre", "onset": 50.4113, "offset": 53.5948, "question_uuid": "85f709f0-a4f1-570a-82b9-9dc281b90340", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:49:30.497+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "phase", "trial": 1, "phase": "question", "onset": 53.6114, "offset": 57.5948, "question_uuid": "85f709f0-a4f1-570a-82b9-9dc281b90340", "condition": "primary", "answer": "no", "response_token": "no"}
+{"ts": "2026-08-25T00:49:42.447+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "aborted", "t": 69.5458}
+{"ts": "2026-08-25T00:49:42.450+00:00", "run_id": "sub-sub01_ses-01_run-05", "kind": "run_written", "path": "/Users/morpheous/WORKSPACE/PROJECTS/fMRI/InnerSpeech/PsychoPy/V1/data/runs/sub-sub01_ses-01_run-05.json", "n_trials": 1}

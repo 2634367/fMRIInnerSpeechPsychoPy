@@ -26,8 +26,48 @@ interpreter bundled inside `/Applications/PsychoPy.app`. You can also open
 | `--auto` | advance the pre-scan screens with no keypress (display check) |
 | `--pilot` | `--blocks 2 --no-scanner --windowed` |
 | `--seed N` | fix the RNG; the seed is recorded either way, so any run can be rebuilt |
+| `--quiet` | no terminal readout during the run |
 
 `escape` aborts at any point and still writes everything collected so far.
+
+## The operator console
+
+While the run is on screen, the terminal shows where it is:
+
+```
+── sub-sub01_ses-01_run-05 ───────────────────────────────────────────────────────────────────
+   config   experiment.yaml · inner_speech_v2
+   trials   100  (10 blocks × 10)
+   bank     80 questions
+   phases   fixation_pre › question › blank › answer › fixation_post
+   scanner  TR 0.8s · 12 dummy pulses on key `5`
+   plan     seed 1846329471 · 3 questions reused · est. 24:20
+   ready    instructions on screen - press space
+   scan     t0 locked to pulse 12/12
+
+  run    █████████░░░░░░░░░░░░░░░░░  36%   trial 36/100   block 4/10        8:47 / 24:20
+  phase  ██████████████░░░░░░░░░░░░ answer          1.8s   fix  ›  que  ›  bla  › [ans] ›  fix
+  now    Is a plum a fruit?                                              primary · yes → YES
+  next   Is the pictured object an animal?                                 primary · no → NO
+```
+
+The last four lines are rewritten in place and count down in real time, so the
+log above them stays readable. `answer` is the truth of the proposition and the
+token after the arrow is what the participant repeats — they differ on
+`opposite` and `constant_word` trials.
+
+Repainting costs ~0.4% of one frame and happens at most `console.refresh_hz`
+times a second, just after the buffer swap:
+
+```yaml
+console:
+  refresh_hz: 10                 # live redraw rate; 0 for one plain line per trial
+  colour: true
+```
+
+Set `refresh_hz: 0`, pass `--quiet`, or redirect stdout to a file and the live
+block degrades to one plain line per trial — which is what you want when you are
+keeping a text log of the session.
 
 ## Layout
 
@@ -40,6 +80,7 @@ innerspeech/config.py    YAML loading + validation
 innerspeech/bank.py      bank loading, label balancing, jitter, run construction
 innerspeech/db.py        the JSON database (the only thing that writes to disk)
 innerspeech/session.py   window, timing loop, trigger handling, run flow
+innerspeech/console.py   the operator's terminal readout (prints, never records)
 innerspeech/views/       one class per question view
 run_experiment.py        entry point
 ```

@@ -65,6 +65,10 @@ conditions:
   constant_word: {per_run: 5,  cue: "▲", show_question: true,  response: ready}
   opposite:      {per_run: 5,  cue: "✖", show_question: true,  response: opposite}
 
+console:                         # operator readout in the terminal
+  refresh_hz: 10                 # live redraw rate; 0 for one plain line per trial
+  colour: true
+
 keys:
   quit: ["escape"]
   advance: ["space"]

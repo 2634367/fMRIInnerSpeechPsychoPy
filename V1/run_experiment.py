@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent
 CONFIG_DIR = ROOT / "config"
 sys.path.insert(0, str(ROOT))
 
-from innerspeech import bank, config, db, session  # noqa: E402
+from innerspeech import bank, config, console, db, session  # noqa: E402
 
 
 def _config_names():
@@ -60,6 +60,8 @@ def parse_args():
                    help="advance the pre-scan screens without a keypress")
     p.add_argument("--pilot", action="store_true",
                    help="shorthand for --blocks 2 --no-scanner --windowed")
+    p.add_argument("--quiet", action="store_true",
+                   help="no terminal readout during the run")
     return p.parse_args()
 
 
@@ -87,23 +89,21 @@ def main():
     meta = {"participant": args.participant, "session": args.session,
             "run": run_no, "pilot": bool(args.pilot)}
 
-    print(f"[{run_id}] {args.config.name}, {len(questions)} questions in bank, "
-          f"{cfg['run']['n_blocks'] * cfg['run']['trials_per_block']} trials")
+    con = console.Console(cfg, enabled=not args.quiet)
+    con.header(run_id, args.config, len(questions))
 
     sess = session.Session(
         cfg, meta, database, seed=args.seed,
         wait_for_scanner=not args.no_scanner,
         fullscreen=False if args.windowed else None,
-        auto=args.auto,
+        auto=args.auto, con=con,
     )
     try:
         record, path = sess.run(questions)
     finally:
         database.close()
 
-    status = "ABORTED" if record["aborted"] else "complete"
-    print(f"[{run_id}] {status}: {len(record['trials'])} trials, "
-          f"{record.get('duration')} s -> {path}")
+    con.summary(record, path)
     return 1 if record["aborted"] else 0
 
 

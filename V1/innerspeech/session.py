@@ -10,7 +10,7 @@ import random
 from psychopy import core, visual
 from psychopy.hardware import keyboard
 
-from . import bank, db, views
+from . import bank, console, db, views
 
 
 class Abort(Exception):
@@ -19,8 +19,9 @@ class Abort(Exception):
 
 class Session:
     def __init__(self, cfg, meta, database, seed=None, wait_for_scanner=True,
-                 fullscreen=None, auto=False):
+                 fullscreen=None, auto=False, con=None):
         self.cfg = cfg
+        self.con = con or console.Console(cfg)
         self.meta = meta
         self.db = database
         self.seed = random.SystemRandom().randrange(2 ** 31) if seed is None else seed
@@ -93,6 +94,7 @@ class Session:
             if onset is None:
                 onset = self.now()
             self._poll()
+            self.con.tick(self.now())
             if self.now() >= t_end - self.frame_dur / 2:
                 break
         return round(onset, 4), round(self.now(), 4)
@@ -129,6 +131,7 @@ class Session:
         if not self.wait_for_scanner:
             self.t0 = core.getTime()
             self.db.log("scan_start", t=0.0, simulated=True, pulses=0)
+            self.con.note("scan", "no scanner - t0 is now")
             return
 
         pulses = []
@@ -139,6 +142,7 @@ class Session:
             )
             self.message.draw()
             self.win.flip()
+            self.con.waiting(len(pulses), n)
             for key in self.kb.getKeys([trigger] + list(quit_keys), waitRelease=False):
                 if key.name in quit_keys:
                     raise Abort()
@@ -150,6 +154,7 @@ class Session:
         self.t0 = t_down if (t_down and abs(t_seen - t_down) < 1.0) else t_seen
         self.db.log("scan_start", t=0.0, simulated=False, pulses=len(pulses),
                     t0_monotonic=round(self.t0, 6))
+        self.con.note("scan", f"t0 locked to pulse {len(pulses)}/{n}")
 
     def run_trial(self, trial):
         """Present one trial. Returns it with measured onsets and offsets filled in."""
@@ -168,7 +173,8 @@ class Session:
         cursor = trial["t_start"]
         for phase in self.cfg["trial"]["phases"]:
             name = phase["name"]
-            cursor += trial["durations"][name]
+            start, cursor = cursor, cursor + trial["durations"][name]
+            self.con.phase(name, start, cursor)
             onset, offset = self._present(painters[phase["show"]], cursor)
             onsets[name], offsets[name] = onset, offset
             self.db.log("phase", trial=trial["trial"], phase=name,
@@ -204,23 +210,31 @@ class Session:
             record["questions_reused"] = reused
             self.db.log("run_built", n_trials=len(trials), reused=reused,
                         seed=self.seed)
+            self.con.plan(self.seed, trials, reused)
 
+            self.con.note("ready", "instructions on screen - " + (
+                "auto-advancing" if self.auto
+                else "press " + "/".join(self.cfg["keys"]["advance"])))
             self.show_message(self.cfg["instructions"], self.cfg["keys"]["advance"])
             self.wait_for_triggers()
             record["t0_monotonic"] = round(self.t0, 6)
 
             # lead-in, trials, lead-out on one continuous schedule
             cursor = self.cfg["run"]["lead_in"]
+            self.con.trial(None, trials[0])
+            self.con.phase("lead-in", 0.0, cursor)
             self._present(self.fixation.draw, cursor)
             self.db.log("lead_in", onset=0.0, offset=round(cursor, 4))
 
-            for trial in trials:
+            for i, trial in enumerate(trials):
                 trial["t_start"] = round(cursor, 4)
+                self.con.trial(trial, trials[i + 1] if i + 1 < len(trials) else None)
                 self.run_trial(trial)
                 cursor = trial["t_end"]
                 record["trials"].append(trial)
 
-            cursor += self.cfg["run"]["lead_out"]
+            start, cursor = cursor, cursor + self.cfg["run"]["lead_out"]
+            self.con.phase("lead-out", start, cursor)
             self._present(self.fixation.draw, cursor)
             self.db.log("lead_out", offset=round(cursor, 4))
             record["duration"] = round(self.now(), 4)
