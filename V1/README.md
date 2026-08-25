@@ -9,6 +9,7 @@ design follows.
 ```bash
 ./run.sh --pilot            # windowed, 2 blocks, no scanner — check the display
 ./run.sh --participant sub01 --session 1
+./run.sh --config glm --participant sub01 --session 1   # config/experiment-glm.yaml
 ```
 
 `run.sh` uses `python3` if `psychopy` is importable there, otherwise the
@@ -17,6 +18,7 @@ interpreter bundled inside `/Applications/PsychoPy.app`. You can also open
 
 | flag | effect |
 |---|---|
+| `--config NAME` | which config to run: `experiment` (default), `glm`, `mvpa`, `time-series`. A path or file name works too |
 | `--participant` / `--session` / `--run` | run identity (`--run` defaults to the next unused one) |
 | `--blocks N` | shorten the run; condition counts rescale proportionally |
 | `--no-scanner` | start immediately instead of waiting for trigger pulses |
@@ -31,6 +33,7 @@ interpreter bundled inside `/Applications/PsychoPy.app`. You can also open
 
 ```
 config/experiment.yaml   all settings — timing, window, conditions, scanner
+config/experiment-*.yaml one per analysis aim (glm, mvpa, time-series); pick with --config
 questions/bank.json      the question bank
 questions/images/        image stimuli
 innerspeech/config.py    YAML loading + validation

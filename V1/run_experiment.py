@@ -2,6 +2,7 @@
 """Run one functional run of the inner-speech task.
 
     python run_experiment.py --participant sub01 --session 1
+    python run_experiment.py --config glm     # config/experiment-glm.yaml
     python run_experiment.py --pilot          # windowed, short, no scanner
 
 Everything the run produces is written to the JSON database under `data/`.
@@ -11,15 +12,39 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+CONFIG_DIR = ROOT / "config"
 sys.path.insert(0, str(ROOT))
 
 from innerspeech import bank, config, db, session  # noqa: E402
 
 
+def _config_names():
+    return ", ".join(sorted(_short_name(p) for p in CONFIG_DIR.glob("*.yaml")))
+
+
+def _short_name(path):
+    """`config/experiment-glm.yaml` -> `glm`, `config/experiment.yaml` -> `experiment`."""
+    stem = path.stem
+    return stem[len("experiment-"):] if stem.startswith("experiment-") else stem
+
+
+def resolve_config(value):
+    """Accept a path, a file name, or a short name like `glm`."""
+    for candidate in (Path(value), CONFIG_DIR / value,
+                      CONFIG_DIR / f"{value}.yaml",
+                      CONFIG_DIR / f"experiment-{value}.yaml"):
+        if candidate.is_file():
+            return candidate
+    raise argparse.ArgumentTypeError(
+        f"no config `{value}`; available: {_config_names()}")
+
+
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--config", default=ROOT / "config" / "experiment.yaml")
+    p.add_argument("--config", default="experiment", type=resolve_config,
+                   help=f"config file, or a short name ({_config_names()}); "
+                        "default: experiment")
     p.add_argument("--participant", default="sub01")
     p.add_argument("--session", type=int, default=1)
     p.add_argument("--run", type=int, default=None,
@@ -62,7 +87,7 @@ def main():
     meta = {"participant": args.participant, "session": args.session,
             "run": run_no, "pilot": bool(args.pilot)}
 
-    print(f"[{run_id}] {len(questions)} questions in bank, "
+    print(f"[{run_id}] {args.config.name}, {len(questions)} questions in bank, "
           f"{cfg['run']['n_blocks'] * cfg['run']['trials_per_block']} trials")
 
     sess = session.Session(

@@ -2,6 +2,7 @@
 # Launch the task with whichever PsychoPy interpreter is available.
 #
 #   ./run.sh --participant sub01 --session 1
+#   ./run.sh --config glm --participant sub01 --session 1
 #   ./run.sh --pilot
 #
 # Prefers a `psychopy` importable by `python3`; otherwise falls back to the
