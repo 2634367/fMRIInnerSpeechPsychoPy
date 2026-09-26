@@ -58,13 +58,15 @@ run:
   label_balance_pct: 50          # share of primary trials whose answer is yes
 
 trial:
-  round_jitter_to_tr: true
+  round_jitter_to_tr: true       # uniform / exponential only; geometric is always whole TRs
+  jitter: geometric              # uniform | exponential | geometric, for every [lo, hi] phase
+  jitter_p: 0.5                  # geometric: chance the event comes on the next TR
   phases:
-    - {name: fixation_pre,  show: fixation, dur: [2.0, 6.0], jitter: exponential}
+    - {name: fixation_pre,  show: fixation, dur: [2.0, 6.0]}
     - {name: question,      show: question, dur: 4.0}
-    - {name: rest,          show: blank,    dur: [12.0, 16.0], jitter: exponential}
+    - {name: rest,          show: blank,    dur: [12.0, 16.0]}
     # - {name: answer_cue,    show: cue,      dur: 3.0}
-    - {name: fixation_post, show: fixation, dur: [15.0, 20.0], jitter: exponential}
+    - {name: fixation_post, show: fixation, dur: [15.0, 20.0]}
 
 # Trial conditions. `per_run` must sum to n_blocks * trials_per_block (20).
 # The control share is the question bank's embedded control-trial share (15%),

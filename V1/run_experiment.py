@@ -4,8 +4,10 @@
     python run_experiment.py --participant sub01 --session 1
     python run_experiment.py --config glm     # config/experiment-glm.yaml
     python run_experiment.py --pilot          # windowed, short, no scanner
+    python run_experiment.py --overview-only  # draw overview/*.png and exit
 
 Everything the run produces is written to the JSON database under `data/`.
+Before each run, overview images of every config are drawn to `overview/`.
 """
 import argparse
 import sys
@@ -13,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 CONFIG_DIR = ROOT / "config"
+OVERVIEW_DIR = ROOT / "overview"
 sys.path.insert(0, str(ROOT))
 
 from innerspeech import bank, config, console, db, session  # noqa: E402
@@ -62,11 +65,37 @@ def parse_args():
                    help="shorthand for --blocks 2 --no-scanner --windowed")
     p.add_argument("--quiet", action="store_true",
                    help="no terminal readout during the run")
+    p.add_argument("--overview", action=argparse.BooleanOptionalAction, default=True,
+                   help="draw overview images of every config to overview/ "
+                        "before the run; on by default")
+    p.add_argument("--overview-only", action="store_true",
+                   help="draw the overview images and exit, without opening a window")
     return p.parse_args()
+
+
+def write_overview(selected):
+    """Draw overview/*.png for every config; return the paths written."""
+    from innerspeech import overview  # only this step needs matplotlib
+    configs = {_short_name(p): p for p in CONFIG_DIR.glob("*.yaml")}
+    return overview.write_all(configs, OVERVIEW_DIR, selected=_short_name(selected))
+
+
+def _overview_note(selected):
+    """Draw the overview for the console; never stops a scan."""
+    try:
+        paths = write_overview(selected)
+    except Exception as exc:  # noqa: BLE001 - the run goes ahead regardless
+        return f"skipped - {type(exc).__name__}: {exc}"
+    return f"{len(paths)} images in {OVERVIEW_DIR.relative_to(ROOT)}/"
 
 
 def main():
     args = parse_args()
+    if args.overview_only:
+        for path in write_overview(args.config):
+            print(path.relative_to(ROOT))
+        return 0
+
     cfg = config.load(args.config)
 
     if args.pilot:
@@ -91,6 +120,8 @@ def main():
 
     con = console.Console(cfg, enabled=not args.quiet)
     con.header(run_id, args.config, len(questions))
+    if args.overview:
+        con.note("overview", _overview_note(args.config))
 
     sess = session.Session(
         cfg, meta, database, seed=args.seed,

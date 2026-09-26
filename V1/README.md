@@ -10,6 +10,7 @@ design follows.
 ./run.sh --pilot            # windowed, 2 blocks, no scanner — check the display
 ./run.sh --participant sub01 --session 1
 ./run.sh --config glm --participant sub01 --session 1   # config/experiment-glm.yaml
+./run.sh --overview-only    # draw overview/*.png for every config, then exit
 ```
 
 `run.sh` uses `python3` if `psychopy` is importable there, otherwise the
@@ -27,8 +28,36 @@ interpreter bundled inside `/Applications/PsychoPy.app`. You can also open
 | `--pilot` | `--blocks 2 --no-scanner --windowed` |
 | `--seed N` | fix the RNG; the seed is recorded either way, so any run can be rebuilt |
 | `--quiet` | no terminal readout during the run |
+| `--overview` / `--no-overview` | draw the overview images before the run (on by default) |
+| `--overview-only` | draw the overview images and exit — no window, nothing written to `data/` |
 
 `escape` aborts at any point and still writes everything collected so far.
+
+## Overview images
+
+Before every run the task draws what each design in `config/` looks like to
+`overview/`, one PNG per config plus `overview.png` comparing them all:
+
+- **`overview/<config>.png`**: TR, trial count and run length at a glance. It
+  also shows the trial anatomy (each phase at its mean length, jitter whiskers,
+  and a mock-up of the screen), the jitter distribution of each jittered phase,
+  an example run block by block, and the condition counts with the question
+  views.
+- **`overview/overview.png`**: every config side by side, with a summary table,
+  one trial per config on a shared axis, run-length ranges, and every example
+  run on a single clock. The config chosen with `--config` is marked ▶.
+
+The example runs and jitter draws use the task's own run builder and sampler,
+with a fixed seed. That makes the images identical from one launch to the next
+until a config, the bank or the code changes. They show *a* run, not the one
+about to be presented.
+
+Drawing takes a few seconds. If it fails for any reason, the console prints
+`overview  skipped - …` and the run goes ahead. A config that does not load gets
+a placeholder image naming the error, and the other configs are still drawn.
+`run:` keys that the task does not implement (`inter_block_rest`,
+`inter_trial_gap`, `label_*`) are listed in a footnote and left out of every
+length shown.
 
 ## The operator console
 
@@ -41,6 +70,7 @@ While the run is on screen, the terminal shows where it is:
    bank     80 questions
    phases   fixation_pre › question › blank › answer › fixation_post
    scanner  TR 0.8s · 12 dummy pulses on key `5`
+   overview 5 images in overview/
    plan     seed 1846329471 · 3 questions reused · est. 24:20
    ready    instructions on screen - press space
    scan     t0 locked to pulse 12/12
@@ -81,7 +111,9 @@ innerspeech/bank.py      bank loading, label balancing, jitter, run construction
 innerspeech/db.py        the JSON database (the only thing that writes to disk)
 innerspeech/session.py   window, timing loop, trigger handling, run flow
 innerspeech/console.py   the operator's terminal readout (prints, never records)
+innerspeech/overview.py  the overview images of every config (draws, never records)
 innerspeech/views/       one class per question view
+overview/                the generated overview PNGs
 run_experiment.py        entry point
 ```
 
@@ -162,17 +194,32 @@ The trial structure is entirely config-driven:
 
 ```yaml
 trial:
+  round_jitter_to_tr: true
+  jitter: geometric
+  jitter_p: 0.5
   phases:
-    - {name: fixation_pre,  show: fixation, dur: [2.0, 6.0], jitter: exponential}
+    - {name: fixation_pre,  show: fixation, dur: [2.0, 6.0]}
     - {name: question,      show: question, dur: 4.0}
     - {name: blank,         show: blank,    dur: 1.0}
     - {name: answer,        show: cue,      dur: 3.0}
-    - {name: fixation_post, show: fixation, dur: [2.0, 6.0], jitter: exponential}
+    - {name: fixation_post, show: fixation, dur: [2.0, 6.0]}
 ```
 
-A scalar `dur` is fixed; a `[lo, hi]` pair is jittered, uniform or truncated
-exponential, optionally rounded to whole TRs. `show` is one of `fixation`,
-`question`, `cue`, `blank`.
+A scalar `dur` is fixed; a `[lo, hi]` pair is jittered. `show` is one of
+`fixation`, `question`, `cue`, `blank`.
+
+`trial.jitter` sets how every `[lo, hi]` phase is sampled, and a phase can
+override it with its own `jitter:` (and `p:`):
+
+| jitter | draws |
+|---|---|
+| `geometric` | `lo` plus *n* whole TRs, P(*n*) ∝ `p`(1 − `p`)^*n*, capped at `hi` — the truncated geometric (textbook eq. 5.3). Memoryless, so the participant cannot predict the next event; `jitter_p` (default 0.5) is the chance it comes on the next TR. Needs `hi − lo` ≥ one TR |
+| `exponential` | truncated exponential over `[lo, hi]` — short gaps more common |
+| `uniform` | uniform over `[lo, hi]` — the default when `jitter` is not set |
+
+`round_jitter_to_tr` snaps `uniform` and `exponential` draws to the TR grid;
+`geometric` is already in whole TRs. The loader rejects an unknown `jitter`
+rather than falling back to uniform.
 
 ## Conditions
 

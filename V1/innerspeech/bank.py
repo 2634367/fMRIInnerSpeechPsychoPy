@@ -38,7 +38,14 @@ def sample_duration(phase, rng, tr=None, round_to_tr=False):
     if not isinstance(dur, (list, tuple)):
         return float(dur)
     lo, hi = float(dur[0]), float(dur[1])
-    if phase.get("jitter", "uniform") == "exponential":
+    kind = phase.get("jitter", "uniform")
+    if kind == "geometric":
+        # Truncated geometric (textbook eq. 5.3): lo plus n whole TRs. Memoryless
+        # up to the cap, so the participant cannot anticipate the next event,
+        # and already on the TR grid, so no rounding afterwards.
+        n_max = int(math.floor((hi - lo) / tr + 1e-9))
+        return round(lo + _truncated_geometric(phase.get("p", 0.5), n_max, rng) * tr, 4)
+    if kind == "exponential":
         # Truncated exponential: short gaps are more common, which is the
         # standard efficient choice for event-related fMRI designs.
         lam = 1.0 / (0.35 * (hi - lo))
@@ -49,6 +56,21 @@ def sample_duration(phase, rng, tr=None, round_to_tr=False):
     if round_to_tr and tr:
         value = max(lo, round(value / tr) * tr)
     return round(min(value, hi), 4)
+
+
+def _truncated_geometric(p, n_max, rng):
+    """Draw n in 0..n_max with P(n) proportional to p (1 - p)^n.
+
+    One uniform draw, then walk the cumulative probabilities - with p = 0.5 and
+    n_max = 4 the cut points are 16/31, 24/31, 28/31, 30/31.
+    """
+    weights = [(1.0 - p) ** n for n in range(n_max + 1)]
+    u = rng.random() * sum(weights)
+    for n, w in enumerate(weights):
+        u -= w
+        if u < 0:
+            return n
+    return n_max
 
 
 # ------------------------------------------------------------ run builder ---

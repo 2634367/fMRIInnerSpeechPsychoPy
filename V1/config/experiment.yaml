@@ -45,13 +45,15 @@ run:
   trials_per_block: 10           # -> 100 trials/run
 
 trial:
-  round_jitter_to_tr: true
+  round_jitter_to_tr: true       # uniform / exponential only; geometric is always whole TRs
+  jitter: geometric              # uniform | exponential | geometric, for every [lo, hi] phase
+  jitter_p: 0.5                  # geometric: chance the event comes on the next TR
   phases:
-    - {name: fixation_pre,  show: fixation, dur: [2.0, 6.0], jitter: exponential}
+    - {name: fixation_pre,  show: fixation, dur: [2.0, 6.0]}
     - {name: question,      show: question, dur: 4.0}
     - {name: blank,         show: blank,    dur: 1.0}
     - {name: answer,        show: cue,      dur: 3.0}
-    - {name: fixation_post, show: fixation, dur: [2.0, 6.0], jitter: exponential}
+    - {name: fixation_post, show: fixation, dur: [2.0, 6.0]}
 
 # Trial conditions. `per_run` must sum to n_blocks * trials_per_block.
 # response = the token the participant actually repeats during the answer window.
