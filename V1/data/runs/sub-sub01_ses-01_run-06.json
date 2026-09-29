@@ -1,0 +1,200 @@
+{
+  "run_id": "sub-sub01_ses-01_run-06",
+  "experiment": "aim_1_block_localizer_run",
+  "participant": "sub01",
+  "session": 1,
+  "run": 6,
+  "pilot": false,
+  "planner": {
+    "design": "V2",
+    "rev": "193437d76b4a",
+    "id": "run-mtmfi9kd-4",
+    "run": "Aim 1 — Block localizer run",
+    "file": "run-aim-1-block-localizer-run.yaml",
+    "fetched": "2026-09-29T12:16:06-04:00",
+    "live": true,
+    "reason": null
+  },
+  "seed": 1279579801,
+  "started": "2026-09-29T16:16:13.088+00:00",
+  "aborted": true,
+  "config": {
+    "experiment": "aim_1_block_localizer_run",
+    "paths": {
+      "data_dir": "data",
+      "bank": "questions/bank.json",
+      "images_dir": "questions/images"
+    },
+    "window": {
+      "size": [
+        1280,
+        800
+      ],
+      "fullscreen": true,
+      "screen": 0,
+      "color": [
+        -1,
+        -1,
+        -1
+      ],
+      "units": "height",
+      "mouse_visible": false
+    },
+    "text": {
+      "font": "Arial",
+      "height": 0.06,
+      "wrap_width": 1.3,
+      "color": [
+        1,
+        1,
+        1
+      ],
+      "title_pos": [
+        0,
+        0.3
+      ]
+    },
+    "fixation": {
+      "text": "+",
+      "height": 0.08,
+      "color": [
+        1,
+        1,
+        1
+      ]
+    },
+    "cue": {
+      "height": 0.12,
+      "color": [
+        1,
+        1,
+        1
+      ]
+    },
+    "scanner": {
+      "tr": 2.0,
+      "trigger_key": "5",
+      "wait_for_triggers": 6,
+      "log_triggers": true
+    },
+    "run": {
+      "lead_in": 12.0,
+      "lead_out": 12.0,
+      "n_blocks": 8,
+      "trials_per_block": 1,
+      "inter_block_rest": 0.0,
+      "inter_trial_gap": 0.0
+    },
+    "trial": {
+      "round_jitter_to_tr": false,
+      "jitter": "geometric",
+      "jitter_p": 0.5,
+      "phases": [
+        {
+          "name": "rest_pre",
+          "show": "fixation",
+          "dur": 16.0
+        },
+        {
+          "name": "cued_repetition_block",
+          "show": "question",
+          "dur": 24.0
+        },
+        {
+          "name": "rest_post",
+          "show": "fixation",
+          "dur": 16.0
+        }
+      ]
+    },
+    "conditions": {
+      "primary": {
+        "per_run": 8,
+        "cue": "●",
+        "show_question": true,
+        "response": "answer"
+      },
+      "passive_read": {
+        "per_run": 0,
+        "cue": "○",
+        "show_question": true,
+        "response": "none"
+      },
+      "cue_only": {
+        "per_run": 0,
+        "cue": "◆",
+        "show_question": false,
+        "response": "answer",
+        "cue_from_response": true
+      },
+      "constant_word": {
+        "per_run": 0,
+        "cue": "▲",
+        "show_question": true,
+        "response": "ready"
+      },
+      "opposite": {
+        "per_run": 0,
+        "cue": "✖",
+        "show_question": true,
+        "response": "opposite"
+      }
+    },
+    "console": {
+      "refresh_hz": 10,
+      "colour": true
+    },
+    "keys": {
+      "quit": [
+        "escape"
+      ],
+      "advance": [
+        "space"
+      ]
+    },
+    "instructions": "Respond during the response window, then return to fixation.\n\nPress SPACE when you are ready.\n"
+  },
+  "trials": [
+    {
+      "question_uuid": "5d8022ed-ea16-56a0-9ed9-0b7cbb9ba793",
+      "category": "linguistic",
+      "family": "ling_stone",
+      "view": "text",
+      "text": "Does stone rhyme with bone?",
+      "params": {},
+      "answer": "yes",
+      "condition": "primary",
+      "response_token": "yes",
+      "cue": "●",
+      "show_question": true,
+      "durations": {
+        "rest_pre": 16.0,
+        "cued_repetition_block": 24.0,
+        "rest_post": 16.0
+      },
+      "block": 0,
+      "index_in_block": 0,
+      "trial": 0,
+      "t_start": 12.0,
+      "onsets": {
+        "rest_pre": 12.0169,
+        "cued_repetition_block": 28.0169,
+        "rest_post": 52.0168
+      },
+      "offsets": {
+        "rest_pre": 28.0004,
+        "cued_repetition_block": 52.0005,
+        "rest_post": 68.0003
+      },
+      "t_end": 68.0
+    }
+  ],
+  "questions_reused": 0,
+  "t0_monotonic": 22.917027,
+  "duration": 102.251,
+  "ended": "2026-09-29T16:18:06.406+00:00",
+  "trigger_times": [
+    100.251
+  ],
+  "n_triggers": 1
+}

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inner Speech Demo</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="launcher.js"></script>
+</head>
+<body>
+  <main class="launcher" id="launcher">
+    <header class="top">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">IS</div>
+        <div>
+          <h1>Inner speech · browser demo</h1>
+          <p>Plays any config with the task's own run builder. Writes nothing to <code>data/</code>.</p>
+        </div>
+      </div>
+      <button class="ghost" id="open-debug" title="Open the debug window (d on the stage)">Debug window</button>
+      <button class="ghost" id="theme" title="Light / dark">Theme</button>
+    </header>
+
+    <div class="toolbar">
+      <input type="search" id="filter" placeholder="Filter configs   /" aria-label="Filter configs">
+      <div class="chips" id="opt-chips"></div>
+      <span style="flex:1"></span>
+      <div class="seg" role="group" aria-label="Presets">
+        <button type="button" data-preset="quick" title="2 blocks, no scanner, auto-advance, ×5, debug keys">Quick look</button>
+        <button type="button" data-preset="full" title="The whole run, simulated scanner, ×1">Full run</button>
+      </div>
+      <button id="toggle-options" aria-expanded="false">Options</button>
+    </div>
+
+    <form class="options" id="options" hidden>
+      <div class="field">
+        <label class="title" for="o-seed">Seed</label>
+        <div class="row">
+          <input type="number" id="o-seed" name="seed" placeholder="random" min="0" step="1">
+          <input type="number" id="o-blocks" name="blocks" placeholder="all blocks" min="1" step="1" aria-label="Blocks">
+        </div>
+        <span class="hint">Blocks shortens the run (<code>--blocks</code>); counts rescale.</span>
+      </div>
+      <div class="field">
+        <label class="title">Scanner</label>
+        <div class="seg" role="group" data-name="scanner">
+          <button type="button" data-value="none">None</button>
+          <button type="button" data-value="simulate">Simulate</button>
+          <button type="button" data-value="key">Trigger key</button>
+        </div>
+        <span class="hint">Simulate sends the dummy pulses every TR; Trigger key waits for you to press it.</span>
+      </div>
+      <div class="field">
+        <label class="title">Speed</label>
+        <div class="seg" role="group" data-name="speed">
+          <button type="button" data-value="1">×1</button>
+          <button type="button" data-value="2">×2</button>
+          <button type="button" data-value="5">×5</button>
+          <button type="button" data-value="10">×10</button>
+          <button type="button" data-value="30">×30</button>
+        </div>
+        <span class="hint">The run clock runs faster; onset drift is only measured at ×1.</span>
+      </div>
+      <div class="field">
+        <label class="title">Run</label>
+        <div class="checks">
+          <label><input type="checkbox" name="auto"> Auto-advance instructions (<code>--auto</code>)</label>
+          <label><input type="checkbox" name="debug"> Debug keys: space pauses, → skips, +/− speed</label>
+          <label><input type="checkbox" name="fullscreen"> Fullscreen</label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="title">Debug view</label>
+        <div class="checks">
+          <label><input type="checkbox" name="popup"> Open the debug window on start</label>
+          <label><input type="checkbox" name="hud"> Show the HUD on the stage (h)</label>
+        </div>
+        <span class="hint">Every event also goes to the JS console: open devtools.</span>
+      </div>
+    </form>
+
+    <div id="catalog"><div class="empty-state">Loading configs…</div></div>
+  </main>
+
+  <div class="stage" id="stage" tabindex="-1" hidden></div>
+  <div class="lightbox" id="lightbox" hidden><img alt=""></div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>

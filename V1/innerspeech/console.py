@@ -130,6 +130,11 @@ class Console:
     def note(self, label, text):
         self._say(label, text)
 
+    def warn(self, label, text):
+        """A note the operator must not miss."""
+        self._emit(_row([(f"   {label:<9}", "dim"), (str(text), "bold yellow")],
+                        (), self.width, self.colour))
+
     def waiting(self, seen, total):
         """Live pulse counter; repaints only when a pulse arrives."""
         if seen == self._pulses:

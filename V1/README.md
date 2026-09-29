@@ -11,6 +11,8 @@ design follows.
 ./run.sh --participant sub01 --session 1
 ./run.sh --config glm --participant sub01 --session 1   # config/experiment-glm.yaml
 ./run.sh --overview-only    # draw overview/*.png for every config, then exit
+./run.sh planner --design V2 --run "Aim 1 — Block localizer run" --participant sub01 --session 1
+./run.sh web                # demo any config in the browser; writes nothing
 ```
 
 `run.sh` uses `python3` if `psychopy` is importable there, otherwise the
@@ -20,18 +22,165 @@ interpreter bundled inside `/Applications/PsychoPy.app`. You can also open
 | flag | effect |
 |---|---|
 | `--config NAME` | which config to run: `experiment` (default), `glm`, `mvpa`, `time-series`. A path or file name works too |
-| `--participant` / `--session` / `--run` | run identity (`--run` defaults to the next unused one) |
-| `--blocks N` | shorten the run; condition counts rescale proportionally |
+| `--participant` / `--session` / `--run` | run identity (`--run`, or `--run-number`, defaults to the next unused one) |
+| `--blocks N` | shorten the run; condition counts rescale proportionally, and one at 0 stays at 0 |
 | `--no-scanner` | start immediately instead of waiting for trigger pulses |
 | `--windowed` | do not go fullscreen |
 | `--auto` | advance the pre-scan screens with no keypress (display check) |
 | `--pilot` | `--blocks 2 --no-scanner --windowed` |
 | `--seed N` | fix the RNG; the seed is recorded either way, so any run can be rebuilt |
 | `--quiet` | no terminal readout during the run |
+| `--debug` | testing aids. For now: space pauses the run and space resumes it (see below) |
 | `--overview` / `--no-overview` | draw the overview images before the run (on by default) |
 | `--overview-only` | draw the overview images and exit — no window, nothing written to `data/` |
 
 `escape` aborts at any point and still writes everything collected so far.
+
+### Pausing (`--debug`)
+
+With `--debug`, space pauses the run once the scan has started, and space again
+resumes it. The screen holds whatever was showing, with a small "paused" line,
+and the console prints when the pause started and how long it lasted. `escape`
+still aborts while paused.
+
+The run clock stops while paused: `t0` moves forward by the length of the pause,
+so the interrupted phase, and every phase after it, keeps its full scheduled
+length. The run resumes where it left off rather than skipping ahead. The
+scanner keeps acquiring, though, so **a paused run's onsets no longer line up
+with its volumes**. `--debug` is for checking the task, not for data you will
+analyse. A debug run's record has `"debug": true` and lists every pause as
+`{"at": <run-clock s>, "duration": <s>}` (`duration` is `null` if the run was
+aborted while paused), and `events.jsonl` gets matching `pause` and `resume`
+events.
+
+A different key can be set as `keys.pause: ["p"]` in the config. It defaults to
+space, which is also the advance key on the instructions screen. That is safe:
+pausing only works after `t0`, and a space pressed before then is discarded.
+
+## Run from the planner
+
+The MRI Experimental Design Planner compiles one config per run design, and
+`planner` runs one of them directly, with no export and no copying files around:
+
+```bash
+cp .env.example .env                            # then fill in the host and your key
+./run.sh planner                                # the planner's designs (no key needed)
+./run.sh planner --design V2                    # V2's configs: position, run design, file, id
+./run.sh planner --design V2 --download         # mirror them all, then exit
+./run.sh planner --design V2 --run "Aim 1 — Block localizer run" --participant sub01 --session 1
+./run.sh planner --design V2 --run 0 --pilot    # by position
+./run.sh planner --design V2 --run 0 --offline  # skip the network, use the last copy
+```
+
+| flag | effect |
+|---|---|
+| `--host` | the planner; a bare host means https. Default: `PLANNER_HOST` from `.env` |
+| `--design NAME` | the design, as named in the planner. Without it, list the designs |
+| `--run RUN_DESIGN` | the config to run: the run design's name, file stem, id, or 0-based position |
+| `--download` | mirror every config of the design, then exit |
+| `--offline` | do not contact the planner; use the last copy |
+| `--run-number N` | the run number (`--run` here names the run design) |
+
+Every other flag above works the same way after `planner`.
+
+`--run` matches the run design's name exactly, but ignores case, spacing and the
+kind of dash, so `Aim 1 — Block localizer run` finds `Aim 1 - Block localizer
+run`. After the name it tries the file stem (`run-aim-1-block-localizer-run`),
+the run design id (`run-mtmfi9kd-4`, which never changes, so use it in a
+protocol) and the position. A name that matches nothing, or matches more than one
+run design, stops the run and lists what the design has.
+
+**The host and the key** live in `.env` beside `run_experiment.py`, which is
+gitignored. `.env.example` is the committed template:
+
+```bash
+PLANNER_HOST=planner.example.org   # the planner's address; a bare host means https
+PLANNER_KEY=mrip_…                 # People → API keys in the planner
+```
+
+Variables already set in the environment take precedence over `.env`. The key has
+no flag, so it never lands in shell history, and it is sent only over https
+(plain http only to this machine). Nothing the task writes to disk names the host.
+The mirror's `index.json` is saved without the planner's links, and the run
+record leaves the host out.
+
+**Every fetch mirrors the whole design** to `config/planner/<design>/`: each
+config plus `index.json` (the planner's revision and when it was fetched). Configs
+the planner no longer has are removed. Before a run, the overview images of that
+design go to `overview/planner/<design>/`.
+
+**If the planner cannot be reached**, the run goes ahead from the last copy,
+and the console says so in yellow:
+
+```
+   planner  V2 · rev 193437d76b4a · NOT LIVE, planner unreachable (timed out) - copy fetched 2026-09-28 14:02
+```
+
+A refusal is different: a missing or revoked key, or no such design, stops the
+run. At the scanner, `--offline` gets past it. Either way the run record says
+where its config came from:
+
+```json
+"planner": {"design": "V2", "rev": "193437d76b4a",
+            "id": "run-mtmfi9kd-4", "run": "Aim 1 - Block localizer run",
+            "file": "run-aim-1-block-localizer-run.yaml",
+            "fetched": "2026-09-28T14:02:11-04:00", "live": true, "reason": null}
+```
+
+## Browser demo
+
+`web` serves a page that lists every config, local and from the planner, and plays
+any of them in the browser. It is for looking at a design, not for data: it never
+starts PsychoPy and writes nothing to `data/`.
+
+```bash
+./run.sh web                     # http://127.0.0.1:8765, opened in your browser
+./run.sh web --port 9000 --no-open
+```
+
+Each card shows the TR, trial count, run length, one trial's phases, the condition
+counts and the overview image. **▶ Demo** plays it with the options above the
+list. They are remembered in this browser:
+
+| option | effect |
+|---|---|
+| seed | blank draws one; the run is built by `bank.build_run` from it, as `session.py` does |
+| blocks | shortens the run (`--blocks`); never lengthens it |
+| scanner | `none` starts at once, `simulate` sends the dummy pulses every TR, `trigger key` waits for you to press it |
+| speed | ×1 to ×30 on the run clock; onset drift is measured at ×1 only |
+| auto, debug keys, fullscreen | as `--auto`, `--debug` (plus → skips a phase, +/− change speed) and fullscreen |
+
+The stage follows `session.py`: instructions, dummy pulses, t0 at the last one,
+then lead-in, trials and lead-out on one absolute schedule, in `height` units.
+`escape` aborts. The end screen gives the `./run.sh` command that reruns the same
+seed in PsychoPy. That rebuilds the same trials for a participant with no earlier
+runs, because a real run prefers questions the participant has not seen.
+
+**The planner.** Designs mirrored in `config/planner/` are listed with their rev
+and when they were fetched. *Refresh from planner* mirrors a design again, as
+`planner --download` does, and redraws its overview images; *Check the planner*
+lists the designs you have not fetched yet. The host and key come from `.env`
+as before and never reach the page.
+
+**Debugging** has three views of the same event stream:
+
+- **The debug window** (the *Debug window* button, `d` on the stage, or *Open the
+  debug window on start*): the run's header and live block as in the operator
+  console, pause, skip, speed, jump to a trial and abort, and a filterable log of
+  every trial, phase, pulse and control with each onset's drift in ms. Keys
+  pressed there go to the stage, so it can keep the focus.
+- **The JS console** (open devtools): one collapsed group per trial, with a phase
+  line and onset drift each, and the whole plan as a table when the run starts.
+  `window.innerspeech` drives it: `demo('glm', {speed: 10})`, `pause()`,
+  `resume()`, `skip()`, `jump(38, 'question')`, `speed(5)`, `abort()`, and
+  `state`, `trials`, `events`, `cfg`. `innerspeech.help()` lists them.
+- **The HUD** (`h`): run clock, trial, phase countdown, fps and drift, on the stage.
+
+A tab in the background gets no frames from the browser, so its phases are
+skipped; the log says so rather than hiding it.
+
+The server listens on 127.0.0.1 only and answers only requests addressed to it.
+It serves only `web/` and the images under `questions/` and `overview/`.
 
 ## Overview images
 
@@ -104,6 +253,7 @@ keeping a text log of the session.
 ```
 config/experiment.yaml   all settings — timing, window, conditions, scanner
 config/experiment-*.yaml one per analysis aim (glm, mvpa, time-series); pick with --config
+config/planner/<design>/ configs mirrored from the design planner (`planner`)
 questions/bank.json      the question bank
 questions/images/        image stimuli
 innerspeech/config.py    YAML loading + validation
@@ -112,7 +262,10 @@ innerspeech/db.py        the JSON database (the only thing that writes to disk)
 innerspeech/session.py   window, timing loop, trigger handling, run flow
 innerspeech/console.py   the operator's terminal readout (prints, never records)
 innerspeech/overview.py  the overview images of every config (draws, never records)
+innerspeech/planner.py   fetching and mirroring configs from the design planner
+innerspeech/web.py       the browser demo's server (`web`; never writes to data/)
 innerspeech/views/       one class per question view
+web/                     the browser demo: launcher, stage, debug window
 overview/                the generated overview PNGs
 run_experiment.py        entry point
 ```

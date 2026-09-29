@@ -4,6 +4,8 @@
 #   ./run.sh --participant sub01 --session 1
 #   ./run.sh --config glm --participant sub01 --session 1
 #   ./run.sh --pilot
+#   ./run.sh planner --design V2 --run "Aim 1 — Block localizer run"   # from the planner
+#   ./run.sh web                                                       # browser demo
 #
 # Prefers a `psychopy` importable by `python3`; otherwise falls back to the
 # interpreter bundled inside the macOS PsychoPy.app.

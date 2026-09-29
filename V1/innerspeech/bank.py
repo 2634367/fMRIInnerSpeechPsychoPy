@@ -33,6 +33,17 @@ def load(path):
 
 
 # ---------------------------------------------------------------- jitter ---
+def bounds(phase, tr):
+    """The shortest and longest duration the task can draw for a phase."""
+    dur = phase["dur"]
+    if not isinstance(dur, (list, tuple)):
+        return float(dur), float(dur)
+    lo, hi = float(dur[0]), float(dur[1])
+    if phase.get("jitter") == "geometric":      # whole TRs, so `hi` may be out of reach
+        hi = round(lo + math.floor((hi - lo) / tr + 1e-9) * tr, 4)
+    return lo, hi
+
+
 def sample_duration(phase, rng, tr=None, round_to_tr=False):
     dur = phase["dur"]
     if not isinstance(dur, (list, tuple)):

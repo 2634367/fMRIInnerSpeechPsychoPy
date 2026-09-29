@@ -15,7 +15,7 @@ the database.
 import random
 import textwrap
 from collections import Counter
-from math import ceil, floor, radians
+from math import ceil, radians
 from pathlib import Path
 
 from matplotlib import rc_context
@@ -51,7 +51,6 @@ SHOW_LABEL = {"fixation": "fixation cross", "question": "question",
 RESPONSE = {"answer": "repeats the answer", "opposite": "repeats the opposite",
             "none": "stays silent", "ready": 'repeats "ready"'}
 VIEW_ORDER = ("text", "shapes", "image")
-USED_RUN_KEYS = {"lead_in", "lead_out", "n_blocks", "trials_per_block"}
 FALLBACK_FONT = "DejaVu Sans"            # has the cue glyphs ● ○ ◆ ▲ ✖
 RC = {"font.family": ["Arial", FALLBACK_FONT], "font.size": 10,
       "text.color": INK, "axes.edgecolor": AXIS, "axes.labelcolor": MUTED,
@@ -64,15 +63,16 @@ W, M = 16.0, 0.6          # sheet width and side margin, inches
 INNER = W - 2 * M
 
 
-def write_all(configs, out_dir, selected=None):
+def write_all(configs, out_dir, selected=None, root=None):
     """Draw every config plus the comparison; return the paths written.
 
-    `configs` maps short names to YAML paths. PNGs in `out_dir` that no longer
-    belong to a config are removed.
+    `configs` maps short names to YAML paths; `root` is passed on to
+    `config.load`. PNGs in `out_dir` that no longer belong to a config are
+    removed.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    designs = [Design(name, path) for name, path in sorted(configs.items())]
+    designs = [Design(name, path, root) for name, path in sorted(configs.items())]
     written = []
     with rc_context(RC):
         for d in designs:
@@ -92,10 +92,11 @@ def _save(fig, path):
 class Design:
     """One config, loaded, with an example run and its duration statistics."""
 
-    def __init__(self, name, path):
+    def __init__(self, name, path, root=None):
         self.name, self.path, self.error = name, Path(path), None
         try:
-            self.cfg = cfg = config.load(path)
+            self.cfg = cfg = config.load(path, root)
+            self.where = _relative(self.path, cfg.root)
             questions = bank.load(cfg.path("bank"))
             self.trials, _ = bank.build_run(questions, cfg, random.Random(SEED))
         except Exception as exc:        # one bad config must not stop the others
@@ -108,7 +109,7 @@ class Design:
         round_tr = cfg["trial"].get("round_jitter_to_tr", False)
         self.phases = []
         for phase in cfg["trial"]["phases"]:
-            lo, hi = _bounds(phase, self.tr)
+            lo, hi = bank.bounds(phase, self.tr)
             draws = ([bank.sample_duration(phase, rng, self.tr, round_tr)
                       for _ in range(DRAWS)] if hi > lo else [lo])
             self.phases.append({**phase, "lo": lo, "hi": hi, "draws": draws,
@@ -120,7 +121,7 @@ class Design:
         self.run_len = [lead + self.n_trials * t for t in self.trial_len]
         self.segments = self._timeline()
         self.example_len = self.segments[-1]["t0"] + self.segments[-1]["dur"]
-        self.ignored = sorted(f"run.{k}" for k in set(run) - USED_RUN_KEYS)
+        self.ignored = sorted(f"run.{k}" for k in set(run) - config.RUN_KEYS)
 
     def _timeline(self):
         """Every on-screen segment of the example run, lead-in to lead-out."""
@@ -149,15 +150,12 @@ class Design:
         return self.trials[0]
 
 
-def _bounds(phase, tr):
-    """The shortest and longest duration the task can draw for a phase."""
-    dur = phase["dur"]
-    if not isinstance(dur, (list, tuple)):
-        return float(dur), float(dur)
-    lo, hi = float(dur[0]), float(dur[1])
-    if phase.get("jitter") == "geometric":      # whole TRs, so `hi` may be out of reach
-        hi = round(lo + floor((hi - lo) / tr + 1e-9) * tr, 4)
-    return lo, hi
+def _relative(path, root):
+    """`config/glm.yaml`, `config/planner/V2/run-….yaml`: where the operator finds it."""
+    try:
+        return path.resolve().relative_to(Path(root).resolve()).as_posix()
+    except ValueError:
+        return path.name
 
 
 def _jitter_text(p):
@@ -326,7 +324,7 @@ def _config_sheet(d):
 def _header(sheet, d, top):
     run, tr = d.cfg["run"], d.tr
     sheet.text(M, top, d.name, fontsize=22, fontweight="bold", color=TITLE)
-    sheet.text(M, top + 0.45, f"config/{d.path.name}  ·  {d.cfg['experiment']}  ·  "
+    sheet.text(M, top + 0.45, f"{d.where}  ·  {d.cfg['experiment']}  ·  "
                + "  ›  ".join(p["name"] for p in d.phases), fontsize=10.5, color=INK2)
     lo, mean, hi = d.run_len
     _tiles(sheet, top + 0.9, [

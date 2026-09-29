@@ -1,0 +1,313 @@
+{
+  "run_id": "sub-sub01_ses-01_run-08",
+  "experiment": "aim_3_compressed_question_run",
+  "participant": "sub01",
+  "session": 1,
+  "run": 8,
+  "pilot": false,
+  "planner": {
+    "design": "V2",
+    "rev": "193437d76b4a",
+    "id": "run-mtubcfoz-1qv",
+    "run": "Aim 3 — Compressed question run",
+    "file": "run-aim-3-compressed-question-run.yaml",
+    "fetched": "2026-09-29T12:24:25-04:00",
+    "live": true,
+    "reason": null
+  },
+  "seed": 444046269,
+  "started": "2026-09-29T16:24:31.897+00:00",
+  "aborted": true,
+  "config": {
+    "experiment": "aim_3_compressed_question_run",
+    "paths": {
+      "data_dir": "data",
+      "bank": "questions/bank.json",
+      "images_dir": "questions/images"
+    },
+    "window": {
+      "size": [
+        1280,
+        800
+      ],
+      "fullscreen": true,
+      "screen": 0,
+      "color": [
+        -1,
+        -1,
+        -1
+      ],
+      "units": "height",
+      "mouse_visible": false
+    },
+    "text": {
+      "font": "Arial",
+      "height": 0.06,
+      "wrap_width": 1.3,
+      "color": [
+        1,
+        1,
+        1
+      ],
+      "title_pos": [
+        0,
+        0.3
+      ]
+    },
+    "fixation": {
+      "text": "+",
+      "height": 0.08,
+      "color": [
+        1,
+        1,
+        1
+      ]
+    },
+    "cue": {
+      "height": 0.12,
+      "color": [
+        1,
+        1,
+        1
+      ]
+    },
+    "scanner": {
+      "tr": 0.8,
+      "trigger_key": "5",
+      "wait_for_triggers": 8,
+      "log_triggers": true
+    },
+    "run": {
+      "lead_in": 12.0,
+      "lead_out": 12.0,
+      "n_blocks": 3,
+      "trials_per_block": 10,
+      "inter_block_rest": 12.0,
+      "inter_trial_gap": 0.0
+    },
+    "trial": {
+      "round_jitter_to_tr": false,
+      "jitter": "geometric",
+      "jitter_p": 0.5,
+      "phases": [
+        {
+          "name": "fixation",
+          "show": "fixation",
+          "dur": [
+            2.0,
+            6.0
+          ],
+          "jitter": "geometric",
+          "p": 0.5
+        },
+        {
+          "name": "question_prompt",
+          "show": "question",
+          "dur": 4.0
+        },
+        {
+          "name": "maintenance_delay",
+          "show": "blank",
+          "dur": [
+            4.0,
+            8.0
+          ],
+          "jitter": "geometric",
+          "p": 0.5
+        },
+        {
+          "name": "answer_cue",
+          "show": "cue",
+          "dur": 1.0
+        },
+        {
+          "name": "paced_repetition",
+          "show": "cue",
+          "dur": 6.0
+        },
+        {
+          "name": "iti",
+          "show": "fixation",
+          "dur": [
+            2.0,
+            6.0
+          ],
+          "jitter": "geometric",
+          "p": 0.5
+        }
+      ]
+    },
+    "conditions": {
+      "primary": {
+        "per_run": 30,
+        "cue": "●",
+        "show_question": true,
+        "response": "answer"
+      },
+      "passive_read": {
+        "per_run": 0,
+        "cue": "○",
+        "show_question": true,
+        "response": "none"
+      },
+      "cue_only": {
+        "per_run": 0,
+        "cue": "◆",
+        "show_question": false,
+        "response": "answer",
+        "cue_from_response": true
+      },
+      "constant_word": {
+        "per_run": 0,
+        "cue": "▲",
+        "show_question": true,
+        "response": "ready"
+      },
+      "opposite": {
+        "per_run": 0,
+        "cue": "✖",
+        "show_question": true,
+        "response": "opposite"
+      }
+    },
+    "console": {
+      "refresh_hz": 10,
+      "colour": true
+    },
+    "keys": {
+      "quit": [
+        "escape"
+      ],
+      "advance": [
+        "space"
+      ]
+    },
+    "instructions": "Respond during the 1-second window, then return to fixation.\n\nPress SPACE when you are ready.\n"
+  },
+  "trials": [
+    {
+      "question_uuid": "66f5eb62-b0cc-5aed-8c7a-479c0d4a5b4f",
+      "category": "perceptual_relational",
+      "family": "relside_triangle_diamond",
+      "view": "shapes",
+      "text": "Is the triangle left of the diamond?",
+      "params": {
+        "shapes": [
+          {
+            "kind": "triangle",
+            "pos": [
+              -0.16,
+              -0.05
+            ]
+          },
+          {
+            "kind": "diamond",
+            "pos": [
+              0.16,
+              -0.05
+            ]
+          }
+        ]
+      },
+      "answer": "yes",
+      "condition": "primary",
+      "response_token": "yes",
+      "cue": "●",
+      "show_question": true,
+      "durations": {
+        "fixation": 2.0,
+        "question_prompt": 4.0,
+        "maintenance_delay": 5.6,
+        "answer_cue": 1.0,
+        "paced_repetition": 6.0,
+        "iti": 2.8
+      },
+      "block": 0,
+      "index_in_block": 0,
+      "trial": 0,
+      "t_start": 12.0,
+      "onsets": {
+        "fixation": 12.0228,
+        "question_prompt": 14.0228,
+        "maintenance_delay": 18.0227,
+        "answer_cue": 23.6227,
+        "paced_repetition": 24.6228,
+        "iti": 30.6227
+      },
+      "offsets": {
+        "fixation": 14.0062,
+        "question_prompt": 18.0063,
+        "maintenance_delay": 23.6062,
+        "answer_cue": 24.6063,
+        "paced_repetition": 30.6062,
+        "iti": 33.4061
+      },
+      "t_end": 33.4
+    },
+    {
+      "question_uuid": "32f15067-598a-54ac-bb33-72df7aba1c83",
+      "category": "perceptual_relational",
+      "family": "relpos_square_circle",
+      "view": "shapes",
+      "text": "Is the circle below the square?",
+      "params": {
+        "shapes": [
+          {
+            "kind": "square",
+            "pos": [
+              0.0,
+              0.06
+            ]
+          },
+          {
+            "kind": "circle",
+            "pos": [
+              0.0,
+              -0.16
+            ]
+          }
+        ]
+      },
+      "answer": "yes",
+      "condition": "primary",
+      "response_token": "yes",
+      "cue": "●",
+      "show_question": true,
+      "durations": {
+        "fixation": 3.6,
+        "question_prompt": 4.0,
+        "maintenance_delay": 4.0,
+        "answer_cue": 1.0,
+        "paced_repetition": 6.0,
+        "iti": 2.0
+      },
+      "block": 0,
+      "index_in_block": 1,
+      "trial": 1,
+      "t_start": 33.4,
+      "onsets": {
+        "fixation": 33.4228,
+        "question_prompt": 37.0228,
+        "maintenance_delay": 41.0227,
+        "answer_cue": 45.0065,
+        "paced_repetition": 46.0227,
+        "iti": 52.0228
+      },
+      "offsets": {
+        "fixation": 37.0062,
+        "question_prompt": 41.0061,
+        "maintenance_delay": 44.9964,
+        "answer_cue": 46.0062,
+        "paced_repetition": 52.0061,
+        "iti": 54.0062
+      },
+      "t_end": 54.0
+    }
+  ],
+  "questions_reused": 0,
+  "t0_monotonic": 20.719273,
+  "duration": 62.29,
+  "ended": "2026-09-29T16:25:43.967+00:00",
+  "trigger_times": [],
+  "n_triggers": 0
+}

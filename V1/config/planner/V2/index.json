@@ -1,0 +1,49 @@
+{
+  "name": "V2",
+  "rev": "193437d76b4a",
+  "configs": [
+    {
+      "index": 0,
+      "id": "run-mtmfi9kd-4",
+      "run": "Aim 1 — Block localizer run",
+      "file": "run-aim-1-block-localizer-run.yaml",
+      "stem": "run-aim-1-block-localizer-run"
+    },
+    {
+      "index": 1,
+      "id": "run-mtubax2r-1di",
+      "run": "Aim 2 — Question run",
+      "file": "run-aim-2-question-run.yaml",
+      "stem": "run-aim-2-question-run"
+    },
+    {
+      "index": 2,
+      "id": "run-mtubcfoz-1qv",
+      "run": "Aim 3 — Compressed question run",
+      "file": "run-aim-3-compressed-question-run.yaml",
+      "stem": "run-aim-3-compressed-question-run"
+    },
+    {
+      "index": 3,
+      "id": "run-muhaoj8n-2o",
+      "run": "Aim 3 — Separated calibration run",
+      "file": "run-aim-3-separated-calibration-run.yaml",
+      "stem": "run-aim-3-separated-calibration-run"
+    },
+    {
+      "index": 4,
+      "id": "run-muhaoj8n-2q",
+      "run": "Rest run (unlabeled)",
+      "file": "run-rest-run-unlabeled.yaml",
+      "stem": "run-rest-run-unlabeled"
+    },
+    {
+      "index": 5,
+      "id": "run-mulkww7p-2l",
+      "run": "Perceived-speech control run",
+      "file": "run-perceived-speech-control-run.yaml",
+      "stem": "run-perceived-speech-control-run"
+    }
+  ],
+  "fetched": "2026-09-29T12:24:25-04:00"
+}

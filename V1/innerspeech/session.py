@@ -4,6 +4,11 @@ Time zero is the last dummy-volume trigger pulse. Every phase boundary is
 scheduled as an absolute offset from that instant, so timing error never
 accumulates across a 30-minute run. All onsets written to the database are in
 that same run-clock timebase and can be used directly as GLM onsets.
+
+With `debug`, the pause key (`keys.pause`, default space) holds the run and
+the same key resumes it. The run clock stops while paused, so every remaining
+phase keeps its full length - but the scanner does not stop, so a paused run's
+onsets no longer line up with its volumes. The record lists every pause.
 """
 import random
 
@@ -19,7 +24,7 @@ class Abort(Exception):
 
 class Session:
     def __init__(self, cfg, meta, database, seed=None, wait_for_scanner=True,
-                 fullscreen=None, auto=False, con=None):
+                 fullscreen=None, auto=False, con=None, debug=False):
         self.cfg = cfg
         self.con = con or console.Console(cfg)
         self.meta = meta
@@ -29,6 +34,9 @@ class Session:
         self.wait_for_scanner = wait_for_scanner
         self.fullscreen = fullscreen
         self.auto = auto
+        self.debug = debug
+        self.pause_keys = list(cfg["keys"].get("pause", ["space"])) if debug else []
+        self.pauses = []
         self.t0 = None
         self.trigger_times = []
         self.aborted = False
@@ -67,6 +75,12 @@ class Session:
         )
         self.views = views.build_all(self.win, self.cfg)
         self.kb = keyboard.Keyboard()
+        if self.debug:
+            self.paused_label = visual.TextStim(
+                self.win, text=f"paused - {'/'.join(self.pause_keys)} to resume",
+                height=self.cfg["text"]["height"] * 0.6, pos=(0, -0.42),
+                color=self.cfg["text"]["color"], font=self.cfg["text"]["font"],
+            )
 
     def close(self):
         if getattr(self, "win", None):
@@ -74,16 +88,25 @@ class Session:
 
     # ------------------------------------------------------- key polling ---
     def _poll(self):
-        """Drain the keyboard: record trigger pulses, honour the quit key."""
+        """Drain the keyboard: record trigger pulses, honour the quit key.
+
+        Returns True when the pause key was pressed (debug runs only).
+        """
         quit_keys = self.cfg["keys"]["quit"]
         trigger = self.cfg["scanner"]["trigger_key"]
-        for key in self.kb.getKeys([trigger] + list(quit_keys), waitRelease=False):
+        paused = False
+        for key in self.kb.getKeys([trigger] + list(quit_keys) + self.pause_keys,
+                                   waitRelease=False):
             if key.name in quit_keys:
                 raise Abort()
+            if key.name in self.pause_keys:
+                paused = True
+                continue
             if self.t0 is not None and self.cfg["scanner"].get("log_triggers"):
                 t = self.now()
                 self.trigger_times.append(round(t, 4))
                 self.db.log("trigger", t=round(t, 4))
+        return paused
 
     def _present(self, draw, t_end):
         """Draw every frame until the run clock reaches `t_end`."""
@@ -93,11 +116,37 @@ class Session:
             self.win.flip()
             if onset is None:
                 onset = self.now()
-            self._poll()
+            if self._poll():
+                self._pause(draw)
             self.con.tick(self.now())
             if self.now() >= t_end - self.frame_dur / 2:
                 break
         return round(onset, 4), round(self.now(), 4)
+
+    def _pause(self, draw):
+        """Hold the current screen until the pause key comes again.
+
+        Moving t0 forward by the pause stops the run clock, so the phase that
+        was interrupted, and every one after it, keeps its full length.
+        """
+        at = self.now()
+        start = core.getTime()
+        entry = {"at": round(at, 4), "duration": None}   # None if aborted while paused
+        self.pauses.append(entry)
+        self.db.log("pause", t=round(at, 4))
+        self.con.warn("pause", f"paused at {console._clock(at)} - "
+                               f"{'/'.join(self.pause_keys)} to resume")
+        while True:
+            draw()
+            self.paused_label.draw()
+            self.win.flip()
+            if self._poll():
+                break
+        held = core.getTime() - start
+        self.t0 += held
+        entry["duration"] = round(held, 4)
+        self.db.log("resume", t=round(at, 4), paused_for=round(held, 4))
+        self.con.note("resume", f"after {held:.1f}s")
 
     def _blank(self):
         pass
@@ -218,6 +267,9 @@ class Session:
             self.show_message(self.cfg["instructions"], self.cfg["keys"]["advance"])
             self.wait_for_triggers()
             record["t0_monotonic"] = round(self.t0, 6)
+            if self.pause_keys:
+                # a press left over from the pre-scan screens must not pause frame one
+                self.kb.getKeys(self.pause_keys, waitRelease=False)
 
             # lead-in, trials, lead-out on one continuous schedule
             cursor = self.cfg["run"]["lead_in"]
@@ -248,6 +300,8 @@ class Session:
             record["ended"] = db.now_iso()
             record["trigger_times"] = self.trigger_times
             record["n_triggers"] = len(self.trigger_times)
+            if self.debug:
+                record["pauses"] = self.pauses
             path = self.db.write_run(record)
             self.db.log("run_written", path=str(path), n_trials=len(record["trials"]))
             self.close()
