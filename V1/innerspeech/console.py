@@ -8,8 +8,9 @@ STYLES = {"dim": 2, "bold": 1, "red": 31, "green": 32, "yellow": 33,
           "magenta": 35, "cyan": 36}
 FILLED, EMPTY = "█", "░"
 
-# The token the participant repeats, coloured so a glance is enough.
-TOKEN_STYLE = {"yes": "green", "no": "yellow", "ready": "cyan", None: "dim"}
+# The token the participant repeats, coloured so a glance is enough: the first
+# answer label, the second, a constant word, and silence.
+ROLE_STYLE = ("green", "yellow", "cyan", "dim")
 
 
 def _write(text):
@@ -69,8 +70,17 @@ class Console:
         self.n_blocks = run["n_blocks"]
         self.n_trials = run["n_blocks"] * run["trials_per_block"]
         self.phases = [p["name"] for p in cfg["trial"]["phases"]]
-        self.name_w = max(len(p) for p in self.phases + ["lead-in", "lead-out"])
+        self.lead_in = run["lead_in"]["name"]
+        self.name_w = max(len(p) for p in self.phases
+                          + [self.lead_in, run["lead_out"]["name"]])
         self.total = None              # estimated run duration, filled in by plan()
+
+        first, second = cfg["responses"]["labels"]
+        self.silent = cfg["responses"]["silent_label"]
+        words = {c["word"] for c in cfg["conditions"].values()
+                 if c["response"] in ("constant", "ready")}
+        self.token_style = {**{w: ROLE_STYLE[2] for w in words}, first: ROLE_STYLE[0],
+                            second: ROLE_STYLE[1], None: ROLE_STYLE[3]}
 
         self.cur = self.nxt = None
         self.span = ("—", 0.0, 1.0)
@@ -120,9 +130,9 @@ class Console:
         self._say("scanner", f"TR {scanner['tr']}s · {scanner['wait_for_triggers']} "
                              f"dummy pulses on key `{scanner['trigger_key']}`")
 
-    def plan(self, seed, trials, reused):
+    def plan(self, seed, trials, reused, leads):
         """The run is built: durations are known, so the length is too."""
-        self.total = (self.cfg["run"]["lead_in"] + self.cfg["run"]["lead_out"]
+        self.total = (sum(leads.values())
                       + sum(sum(t["durations"].values()) for t in trials))
         self._say("plan", f"seed {seed} · {reused} questions reused · "
                           f"est. {_clock(self.total)}")
@@ -185,7 +195,7 @@ class Console:
         cur = self.cur
         name, t_start, t_end = self.span
         done = cur["trial"] + 1 if cur else 0
-        where = f"block {cur['block'] + 1}/{self.n_blocks}" if cur else "lead-in"
+        where = f"block {cur['block'] + 1}/{self.n_blocks}" if cur else self.lead_in
         frac = min(1.0, t / self.total) if self.total else 0.0
         left = max(0.0, t_end - t)
         strip = []
@@ -211,7 +221,7 @@ class Console:
 
     def _badge(self, trial):
         token = trial["response_token"]
-        return f"{trial['answer']} → {token.upper() if token else 'SILENT'}"
+        return f"{trial['answer']} → {token.upper() if token else self.silent}"
 
     def _question(self, label, trial, style):
         if trial is None:
@@ -221,5 +231,5 @@ class Console:
         text = trial["text"] if trial["show_question"] else "(cue only — not shown)"
         return _row([(f"  {label:<7}", "dim"),
                      (_fit(text, self.width - len(badge) - 14), style)],
-                    [(badge, TOKEN_STYLE.get(trial["response_token"]))],
+                    [(badge, self.token_style.get(trial["response_token"]))],
                     self.width, self.colour)

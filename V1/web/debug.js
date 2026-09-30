@@ -58,7 +58,7 @@ function renderMeta() {
 
 // ================================================================= live ===
 function tokenClass(trial) {
-  return `badge tok-${trial.token ?? 'none'}`;
+  return `badge tok-${trial.role}`;
 }
 
 function question(prefix, trial) {
@@ -109,7 +109,7 @@ function renderLive() {
     const frac = Math.min(1, L.t / L.total);
     $('#run-bar').style.width = `${frac * 100}%`;
     $('#run-right').textContent = `${clock(L.t)} / ${clock(L.total)}  ${Math.round(frac * 100)}%`;
-    const where = L.now ? `trial ${L.now.i + 1}/${L.n_trials} · block ${L.now.block + 1}/${L.n_blocks}` : 'lead-in';
+    const where = L.now ? `trial ${L.now.i + 1}/${L.n_trials} · block ${L.now.block + 1}/${L.n_blocks}` : (L.span?.name ?? meta?.lead_in);   // outside a trial: the lead-in or lead-out
     $('#run-where').textContent = `${where} · ${state}${L.speed !== 1 ? ` · ×${L.speed}` : ''}`;
     if (L.span) {
       const span = L.span;
@@ -177,7 +177,7 @@ function row(e) {
   };
   const d = cell('d', detail);
   d.title = detail;
-  if (e.type === 'trial') d.classList.add(`tok-${e.trial.token ?? 'none'}`);
+  if (e.type === 'trial') d.classList.add(`tok-${e.trial.role}`);
   const x = cell(`x ${late ? 'late' : ''}`, extra);
   r.append(cell('t', t == null ? '—' : t.toFixed(2)), cell('k', kind), d, x);
   r.dataset.text = `${kind} ${detail}`.toLowerCase();

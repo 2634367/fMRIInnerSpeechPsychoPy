@@ -1,5 +1,6 @@
 # Inner speech fMRI decoding - experiment configuration.
-# Everything the task needs lives here. Nothing is hard-coded in the scripts.
+# Merged over config/defaults.yaml, which lists every setting the task reads;
+# anything this file leaves out comes from there. Nothing is hard-coded in the scripts.
 
 experiment: inner_speech_v2
 

@@ -4,7 +4,7 @@ from .base import View
 
 class TextView(View):
     def build(self):
-        self.stim = self._text(pos=(0, 0))
+        self.stim = self._text(pos=self.cfg["views"]["text"]["pos"])
 
     def prepare(self, trial):
         self.stim.text = trial["text"]

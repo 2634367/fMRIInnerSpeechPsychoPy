@@ -338,7 +338,7 @@ async function startDemo(t, overrides = {}) {
     label: t.source === 'planner' ? `${t.designName} · ${t.run}` : t.name,
     seed: plan.seed, source: plan.source, file: plan.source.file, experiment: cfg.experiment,
     n_trials: plan.trials.length, n_blocks: cfg.run.n_blocks, per_block: cfg.run.trials_per_block,
-    phases: cfg.trial.phases.map((p) => p.name), tr: cfg.scanner.tr,
+    phases: cfg.trial.phases.map((p) => p.name), lead_in: cfg.run.lead_in.name, tr: cfg.scanner.tr,
     dummies: cfg.scanner.wait_for_triggers, trigger_key: String(cfg.scanner.trigger_key),
     total: plan.total, n_questions: plan.n_questions, reused: plan.reused,
     options: { scanner: o.scanner, speed: o.speed, auto: o.auto, debug: o.debug, fullscreen: o.fullscreen },

@@ -1,7 +1,8 @@
 """Text plus an image, for image-evoked questions.
 
 params: {"image": "sparrow.png", "size": [0.35, 0.35]}
-Paths are relative to `paths.images_dir` in the config.
+Paths are relative to `paths.images_dir` in the config; the picture sits at
+`views.image.pos`.
 """
 from psychopy import visual
 
@@ -12,7 +13,8 @@ class ImageView(View):
     def build(self):
         self.title = self._text(pos=self.cfg["text"]["title_pos"])
         self.images_dir = self.cfg.path("images_dir")
-        self.stim = visual.ImageStim(self.win, image=None, pos=(0, -0.05))
+        self.stim = visual.ImageStim(self.win, image=None,
+                                     pos=self.cfg["views"]["image"]["pos"])
 
     def prepare(self, trial):
         self.title.text = trial["text"]

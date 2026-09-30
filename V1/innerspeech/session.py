@@ -5,7 +5,7 @@ scheduled as an absolute offset from that instant, so timing error never
 accumulates across a 30-minute run. All onsets written to the database are in
 that same run-clock timebase and can be used directly as GLM onsets.
 
-With `debug`, the pause key (`keys.pause`, default space) holds the run and
+With `debug`, the pause key (`keys.pause`) holds the run and
 the same key resumes it. The run clock stops while paused, so every remaining
 phase keeps its full length - but the scanner does not stop, so a paused run's
 onsets no longer line up with its volumes. The record lists every pause.
@@ -35,7 +35,7 @@ class Session:
         self.fullscreen = fullscreen
         self.auto = auto
         self.debug = debug
-        self.pause_keys = list(cfg["keys"].get("pause", ["space"])) if debug else []
+        self.pause_keys = list(cfg["keys"]["pause"]) if debug else []
         self.pauses = []
         self.t0 = None
         self.trigger_times = []
@@ -53,33 +53,34 @@ class Session:
             size=w["size"],
             fullscr=w["fullscreen"] if self.fullscreen is None else self.fullscreen,
             screen=w["screen"], color=w["color"], units=w["units"],
-            allowGUI=False, waitBlanking=True,
+            allowGUI=w["allow_gui"], waitBlanking=w["wait_blanking"],
         )
-        self.win.mouseVisible = w.get("mouse_visible", False)
-        self.frame_dur = self.win.monitorFramePeriod or 1.0 / 60.0
+        self.win.mouseVisible = w["mouse_visible"]
+        self.frame_dur = self.win.monitorFramePeriod or 1.0 / w["assumed_refresh_hz"]
 
-        f = self.cfg["fixation"]
-        self.fixation = visual.TextStim(
-            self.win, text=f["text"], height=f["height"], color=f["color"],
-            font=self.cfg["text"]["font"],
-        )
+        t = self.cfg["text"]
+        # fixation and every other `screens:` entry: one line of text each
+        self.screens = {
+            name: visual.TextStim(self.win, text=s["text"], height=s["height"],
+                                  color=s["color"], font=s["font"], pos=s["pos"])
+            for name, s in self.cfg["screens"].items()
+        }
         c = self.cfg["cue"]
         self.cue = visual.TextStim(
-            self.win, text="", height=c["height"], color=c["color"],
-            font=self.cfg["text"]["font"],
+            self.win, text="", height=c["height"], color=c["color"], pos=c["pos"],
+            font=t["font"],
         )
         self.message = visual.TextStim(
-            self.win, text="", height=self.cfg["text"]["height"],
-            color=self.cfg["text"]["color"], font=self.cfg["text"]["font"],
-            wrapWidth=self.cfg["text"]["wrap_width"],
+            self.win, text="", height=t["height"], color=t["color"], font=t["font"],
+            wrapWidth=t["wrap_width"], alignText=t["align"],
         )
         self.views = views.build_all(self.win, self.cfg)
         self.kb = keyboard.Keyboard()
         if self.debug:
+            p = self.cfg["messages"]["paused"]
             self.paused_label = visual.TextStim(
-                self.win, text=f"paused - {'/'.join(self.pause_keys)} to resume",
-                height=self.cfg["text"]["height"] * 0.6, pos=(0, -0.42),
-                color=self.cfg["text"]["color"], font=self.cfg["text"]["font"],
+                self.win, text=p["text"].format(keys="/".join(self.pause_keys)),
+                height=p["height"], pos=p["pos"], color=p["color"], font=p["font"],
             )
 
     def close(self):
@@ -102,7 +103,7 @@ class Session:
             if key.name in self.pause_keys:
                 paused = True
                 continue
-            if self.t0 is not None and self.cfg["scanner"].get("log_triggers"):
+            if self.t0 is not None and self.cfg["scanner"]["log_triggers"]:
                 t = self.now()
                 self.trigger_times.append(round(t, 4))
                 self.db.log("trigger", t=round(t, 4))
@@ -151,6 +152,16 @@ class Session:
     def _blank(self):
         pass
 
+    def _painters(self, trial=None):
+        """What each `show` value draws: every screen, plus the trial's own."""
+        painters = {name: stim.draw for name, stim in self.screens.items()}
+        painters["blank"] = self._blank
+        if trial is not None:
+            view = self.views[trial["view"]]
+            painters["question"] = view.draw if trial["show_question"] else self._blank
+            painters["cue"] = self.cue.draw
+        return painters
+
     # ------------------------------------------------------- run phases ---
     def show_message(self, text, wait_keys):
         """Static screen shown before the scan starts; waits for a keypress."""
@@ -159,7 +170,7 @@ class Session:
         self.win.flip()
         self.kb.clearEvents()
         if self.auto:
-            core.wait(1.0)
+            core.wait(self.cfg["pilot"]["auto_advance"])
             return
         while True:
             keys = self.kb.getKeys(list(wait_keys) + list(self.cfg["keys"]["quit"]),
@@ -186,9 +197,8 @@ class Session:
         pulses = []
         self.kb.clearEvents()
         while len(pulses) < n:
-            self.message.text = (
-                f"Waiting for the scanner…\n\n{len(pulses)} / {n} pulses"
-            )
+            self.message.text = self.cfg["messages"]["waiting"].format(
+                seen=len(pulses), total=n)
             self.message.draw()
             self.win.flip()
             self.con.waiting(len(pulses), n)
@@ -200,23 +210,17 @@ class Session:
 
         _, t_down, t_seen = pulses[-1]
         # Prefer the hardware timestamp when it is in the expected timebase.
-        self.t0 = t_down if (t_down and abs(t_seen - t_down) < 1.0) else t_seen
+        tolerance = self.cfg["scanner"]["timestamp_tolerance"]
+        self.t0 = t_down if (t_down and abs(t_seen - t_down) < tolerance) else t_seen
         self.db.log("scan_start", t=0.0, simulated=False, pulses=len(pulses),
                     t0_monotonic=round(self.t0, 6))
         self.con.note("scan", f"t0 locked to pulse {len(pulses)}/{n}")
 
     def run_trial(self, trial):
         """Present one trial. Returns it with measured onsets and offsets filled in."""
-        view = self.views[trial["view"]]
-        view.prepare(trial)
+        self.views[trial["view"]].prepare(trial)
         self.cue.text = trial["cue"]
-
-        painters = {
-            "fixation": self.fixation.draw,
-            "question": (view.draw if trial["show_question"] else self._blank),
-            "cue": self.cue.draw,
-            "blank": self._blank,
-        }
+        painters = self._painters(trial)
 
         onsets, offsets = {}, {}
         cursor = trial["t_start"]
@@ -237,6 +241,22 @@ class Session:
         trial["t_end"] = round(cursor, 4)
         return trial
 
+    def run_lead(self, key, start, dur, record):
+        """Present the lead-in or lead-out (`key`) from `start` for `dur` seconds.
+
+        The event kind stays `lead_in` / `lead_out` whatever the phase is called,
+        so the database reads the same for every config. Returns where it ends.
+        """
+        lead = self.cfg["run"][key]
+        end = start + dur
+        self.con.phase(lead["name"], start, end)
+        onset, offset = self._present(self._painters()[lead["show"]], end)
+        self.db.log(key, name=lead["name"], show=lead["show"], onset=onset,
+                    offset=offset)
+        record[key] = {"name": lead["name"], "show": lead["show"], "dur": dur,
+                       "onset": onset, "offset": offset}
+        return round(end, 4)
+
     # ------------------------------------------------------------- main ---
     def run(self, questions):
         record = {
@@ -256,10 +276,12 @@ class Session:
                 questions, self.cfg, self.rng,
                 already_seen=self.db.seen_question_ids(self.meta["participant"]),
             )
+            # after the trials, so a fixed lead leaves the trial draws untouched
+            leads = bank.lead_durations(self.cfg, self.rng)
             record["questions_reused"] = reused
             self.db.log("run_built", n_trials=len(trials), reused=reused,
                         seed=self.seed)
-            self.con.plan(self.seed, trials, reused)
+            self.con.plan(self.seed, trials, reused, leads)
 
             self.con.note("ready", "instructions on screen - " + (
                 "auto-advancing" if self.auto
@@ -272,11 +294,8 @@ class Session:
                 self.kb.getKeys(self.pause_keys, waitRelease=False)
 
             # lead-in, trials, lead-out on one continuous schedule
-            cursor = self.cfg["run"]["lead_in"]
             self.con.trial(None, trials[0])
-            self.con.phase("lead-in", 0.0, cursor)
-            self._present(self.fixation.draw, cursor)
-            self.db.log("lead_in", onset=0.0, offset=round(cursor, 4))
+            cursor = self.run_lead("lead_in", 0.0, leads["lead_in"], record)
 
             for i, trial in enumerate(trials):
                 trial["t_start"] = round(cursor, 4)
@@ -285,10 +304,7 @@ class Session:
                 cursor = trial["t_end"]
                 record["trials"].append(trial)
 
-            start, cursor = cursor, cursor + self.cfg["run"]["lead_out"]
-            self.con.phase("lead-out", start, cursor)
-            self._present(self.fixation.draw, cursor)
-            self.db.log("lead_out", offset=round(cursor, 4))
+            self.run_lead("lead_out", cursor, leads["lead_out"], record)
             record["duration"] = round(self.now(), 4)
 
         except Abort:

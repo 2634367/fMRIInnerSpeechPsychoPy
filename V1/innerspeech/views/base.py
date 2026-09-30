@@ -30,5 +30,5 @@ class View:
         t = self.cfg["text"]
         return visual.TextStim(
             self.win, text="", font=t["font"], height=t["height"],
-            color=t["color"], wrapWidth=t["wrap_width"], pos=pos, alignText="center",
+            color=t["color"], wrapWidth=t["wrap_width"], pos=pos, alignText=t["align"],
         )

@@ -19,11 +19,13 @@ const C = {
   plain: '',
   late: 'color:#d48a00;font-weight:600',
 };
-export const TOKEN_COLOUR = { yes: '#22a35a', no: '#d49b00', ready: '#1ba3b8', null: '#8a8f94' };
+// by the token's role (stage.js `_role`): the first answer label, the second, a constant word, silence
+export const TOKEN_COLOUR = { first: '#22a35a', second: '#d49b00', constant: '#1ba3b8', none: '#8a8f94' };
 
+/** A trial brief's answer and token; `silent` is the config's responses.silent_label. */
 export function badge(trial) {
   const token = trial.token;
-  return `${trial.answer} → ${token ? token.toUpperCase() : 'SILENT'}`;
+  return `${trial.answer} → ${token ? token.toUpperCase() : trial.silent}`;
 }
 
 export function clock(seconds) {
@@ -104,7 +106,7 @@ export class Feed {
     console.log('config ', plan.cfg);
     console.table(plan.trials.map((t) => ({
       trial: t.trial + 1, block: t.block + 1, condition: t.condition, view: t.view,
-      answer: t.answer, token: t.response_token ?? 'SILENT', cue: t.cue,
+      answer: t.answer, token: t.response_token ?? plan.cfg.responses.silent_label, cue: t.cue,
       text: t.show_question ? t.text : '(cue only)',
       ...Object.fromEntries(Object.entries(t.durations).map(([k, v]) => [k, v])),
     })));
@@ -119,7 +121,7 @@ export class Feed {
       case 'trial': {
         this._closeGroup();
         const t = e.trial;
-        const colour = `color:${TOKEN_COLOUR[t.token ?? 'null']};font-weight:600`;
+        const colour = `color:${TOKEN_COLOUR[t.role]};font-weight:600`;
         console.groupCollapsed(
           `%ctrial ${t.i + 1}/${t.n}%c b${t.block + 1} · ${t.condition} %c${badge(t)}%c ${t.show_question ? t.text : '(cue only - not shown)'}`,
           C.badge, C.dim, colour, C.plain);
@@ -127,7 +129,7 @@ export class Feed {
         return;
       }
       case 'phase': {
-        if (e.trial == null) this._closeGroup();       // lead-in and lead-out stand alone
+        if (e.trial == null) this._closeGroup();       // the lead-in and lead-out stand alone
         const late = e.drift_ms != null && Math.abs(e.drift_ms) > 25;
         const drift = e.meas == null ? 'skipped - frame never shown'
           : `Δ ${e.drift_ms >= 0 ? '+' : ''}${e.drift_ms.toFixed(1)} ms`;

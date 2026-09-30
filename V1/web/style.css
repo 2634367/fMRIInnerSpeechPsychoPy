@@ -15,7 +15,7 @@
   --show-blank: #E7E3C6; --show-cue: #CBA052;
 
   /* the token the participant repeats (console.TOKEN_STYLE) */
-  --tok-yes: #1D7F45; --tok-no: #9A6A00; --tok-ready: #16788A; --tok-none: #767A7E;
+  --tok-first: #1D7F45; --tok-second: #9A6A00; --tok-constant: #16788A; --tok-none: #767A7E;
 
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -30,7 +30,7 @@
     --ink2: #B8BCC0; --muted: #868B91; --line: #29313A; --accent: #2F9E63;
     --accent-ink: #FFFFFF; --accent-soft: #15301F; --warn: #F2B544; --warn-soft: #2F2410;
     --error: #FF7B72; --error-soft: #3A1614;
-    --tok-yes: #5BD38A; --tok-no: #F2C14E; --tok-ready: #4FC9DB; --tok-none: #868B91;
+    --tok-first: #5BD38A; --tok-second: #F2C14E; --tok-constant: #4FC9DB; --tok-none: #868B91;
     --show-blank: #8E8A70;
     --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 6px 20px rgb(0 0 0 / 25%);
     color-scheme: dark;
@@ -41,7 +41,7 @@
   --ink2: #B8BCC0; --muted: #868B91; --line: #29313A; --accent: #2F9E63;
   --accent-ink: #FFFFFF; --accent-soft: #15301F; --warn: #F2B544; --warn-soft: #2F2410;
   --error: #FF7B72; --error-soft: #3A1614;
-  --tok-yes: #5BD38A; --tok-no: #F2C14E; --tok-ready: #4FC9DB; --tok-none: #868B91;
+  --tok-first: #5BD38A; --tok-second: #F2C14E; --tok-constant: #4FC9DB; --tok-none: #868B91;
   --show-blank: #8E8A70;
   --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 6px 20px rgb(0 0 0 / 25%);
   color-scheme: dark;
@@ -250,8 +250,8 @@ body.debug { font-size: 13px; }
 .live .q.now .text { font-weight: 600; }
 .live .q.next .text { color: var(--ink2); }
 .badge { font-size: 11.5px; font-family: var(--mono); white-space: nowrap; }
-.tok-yes { color: var(--tok-yes); } .tok-no { color: var(--tok-no); }
-.tok-ready { color: var(--tok-ready); } .tok-none { color: var(--tok-none); }
+.tok-first { color: var(--tok-first); } .tok-second { color: var(--tok-second); }
+.tok-constant { color: var(--tok-constant); } .tok-none { color: var(--tok-none); }
 .phase-strip { font-family: var(--mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; }
 .phase-strip b { color: var(--warn); }
 .stat-row { display: flex; gap: 6px 12px; flex-wrap: wrap; font-family: var(--mono); font-size: 11.5px; color: var(--ink2); }

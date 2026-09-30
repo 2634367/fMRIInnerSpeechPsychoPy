@@ -58,7 +58,7 @@ popup window and in the browser's JS console.
 
 
 def _config_names():
-    return ", ".join(sorted(config.short_name(p) for p in CONFIG_DIR.glob("*.yaml")))
+    return ", ".join(sorted(config.local_configs(CONFIG_DIR)))
 
 
 def resolve_config(value):
@@ -66,7 +66,7 @@ def resolve_config(value):
     for candidate in (Path(value), CONFIG_DIR / value,
                       CONFIG_DIR / f"{value}.yaml",
                       CONFIG_DIR / f"experiment-{value}.yaml"):
-        if candidate.is_file():
+        if candidate.is_file() and candidate.resolve() != config.DEFAULTS:
             return candidate
     raise argparse.ArgumentTypeError(
         f"no config `{value}`; available: {_config_names()}")
@@ -88,12 +88,14 @@ def _task_flags(p, *run_number):
     p.add_argument("--auto", action="store_true",
                    help="advance the pre-scan screens without a keypress")
     p.add_argument("--pilot", action="store_true",
-                   help="shorthand for --blocks 2 --no-scanner --windowed")
+                   help="shorthand for --blocks N --no-scanner --windowed, N from the "
+                        "config's pilot.blocks (2 by default)")
     p.add_argument("--quiet", action="store_true",
                    help="no terminal readout during the run")
     p.add_argument("--debug", action="store_true",
-                   help="testing aids: space pauses the run and space resumes it. The "
-                        "run clock stops while paused, so onsets stop matching the scanner")
+                   help="testing aids: the pause key (keys.pause, space by default) pauses "
+                        "the run and resumes it. The run clock stops while paused, so "
+                        "onsets stop matching the scanner")
     p.add_argument("--overview", action=argparse.BooleanOptionalAction, default=True,
                    help="draw overview images of every config to overview/ "
                         "before the run; on by default")
@@ -179,7 +181,7 @@ def main(argv=None):
         planner.load_env(ROOT / ".env")
         return web_main(parse_web(argv[1:]))
     args = parse_local(argv)
-    configs = {config.short_name(p): p for p in CONFIG_DIR.glob("*.yaml")}
+    configs = config.local_configs(CONFIG_DIR)
     return run_task(args, args.config, configs, OVERVIEW_DIR)
 
 
@@ -195,12 +197,12 @@ def run_task(args, config_path, configs, overview_dir, root=None, source=None):
 
     if args.pilot:
         args.no_scanner = args.windowed = True
-        args.blocks = args.blocks or 2
+        args.blocks = args.blocks or cfg["pilot"]["blocks"]
     if args.blocks and args.blocks != cfg["run"]["n_blocks"]:
         cfg["run"]["n_blocks"] = args.blocks
         config.rebalance(cfg)
 
-    questions = bank.load(cfg.path("bank"))
+    questions = bank.load(cfg.path("bank"), cfg["responses"]["labels"])
 
     data_dir = cfg.path("data_dir")
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -208,7 +210,8 @@ def run_task(args, config_path, configs, overview_dir, root=None, source=None):
     run_no = args.run or probe.next_run_number(args.participant, args.session)
     probe.close()
 
-    run_id = f"sub-{args.participant}_ses-{args.session:02d}_run-{run_no:02d}"
+    run_id = cfg["paths"]["run_id"].format(participant=args.participant,
+                                           session=args.session, run=run_no)
     database = db.Database(data_dir, run_id)
     meta = {"participant": args.participant, "session": args.session,
             "run": run_no, "pilot": bool(args.pilot), "debug": bool(args.debug)}
@@ -221,7 +224,7 @@ def run_task(args, config_path, configs, overview_dir, root=None, source=None):
         say = con.note if source["live"] else con.warn
         say("planner", _source_note(source))
     if args.debug:
-        keys = "/".join(cfg["keys"].get("pause", ["space"]))
+        keys = "/".join(cfg["keys"]["pause"])
         con.warn("debug", f"{keys} pauses and resumes - onsets will not match the scanner")
     if args.overview:
         con.note("overview", _overview_note(configs, config_path, overview_dir, root))

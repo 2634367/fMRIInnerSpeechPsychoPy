@@ -6,24 +6,23 @@ A question is a JSON object:
      "text": ..., "answer": "yes"|"no", "family": ...,
      "params": { ...view-specific... }}
 
-`family` groups paraphrases and close variants so they can be kept in the same
-machine-learning fold later.
+`answer` is one of the config's `responses.labels`. `family` groups paraphrases
+and close variants so they can be kept in the same machine-learning fold later.
 """
 import json
 import math
 
-FLIP = {"yes": "no", "no": "yes"}
 
-
-def load(path):
+def load(path, labels):
+    """`labels`: the two answers a question may have (`responses.labels`)."""
     questions = json.loads(open(path, encoding="utf-8").read())
     seen = set()
     for q in questions:
         for key in ("uuid", "category", "view", "text", "answer"):
             if key not in q:
                 raise ValueError(f"question missing `{key}`: {q}")
-        if q["answer"] not in FLIP:
-            raise ValueError(f"answer must be yes/no: {q}")
+        if q["answer"] not in labels:
+            raise ValueError(f"answer must be {' or '.join(labels)}: {q}")
         if q["uuid"] in seen:
             raise ValueError(f"duplicate uuid: {q['uuid']}")
         seen.add(q["uuid"])
@@ -59,7 +58,7 @@ def sample_duration(phase, rng, tr=None, round_to_tr=False):
     if kind == "exponential":
         # Truncated exponential: short gaps are more common, which is the
         # standard efficient choice for event-related fMRI designs.
-        lam = 1.0 / (0.35 * (hi - lo))
+        lam = 1.0 / (phase["scale"] * (hi - lo))
         u = rng.random()
         value = lo - math.log(1.0 - u * (1.0 - math.exp(-lam * (hi - lo)))) / lam
     else:
@@ -84,6 +83,16 @@ def _truncated_geometric(p, n_max, rng):
     return n_max
 
 
+def lead_durations(cfg, rng):
+    """The lead-in and lead-out of one run. Drawn after `build_run`, from the
+    same generator, and only when jittered, so a fixed lead leaves every run's
+    draws exactly as they were."""
+    tr = cfg["scanner"]["tr"]
+    round_tr = cfg["trial"]["round_jitter_to_tr"]
+    return {key: sample_duration(cfg["run"][key], rng, tr, round_tr)
+            for key in ("lead_in", "lead_out")}
+
+
 # ------------------------------------------------------------ run builder ---
 def _pick(pool, answer, rng, used):
     """Take one question with the requested answer, preferring unused ones."""
@@ -99,14 +108,17 @@ def _pick(pool, answer, rng, used):
 def build_run(questions, cfg, rng, already_seen=()):
     """Return the ordered trial list for one run.
 
-    Labels are balanced within every condition, and trials are shuffled inside
+    Labels are split by `run.label_balance_pct` within every condition (evenly
+    by default), and trials are shuffled inside
     blocks so both labels are spread evenly across the run.
     """
     conditions = cfg["conditions"]
     n_blocks = cfg["run"]["n_blocks"]
     per_block = cfg["run"]["trials_per_block"]
+    share = cfg["run"]["label_balance_pct"] / 100
+    first, second = cfg["responses"]["labels"]
     tr = cfg["scanner"]["tr"]
-    round_tr = cfg["trial"].get("round_jitter_to_tr", False)
+    round_tr = cfg["trial"]["round_jitter_to_tr"]
 
     used = set(already_seen)
     reused = 0
@@ -114,11 +126,12 @@ def build_run(questions, cfg, rng, already_seen=()):
 
     for name, spec in conditions.items():
         count = spec["per_run"]
-        # split as evenly as possible; give the odd trial to a random label
-        n_yes = count // 2
-        answers = ["yes"] * n_yes + ["no"] * (count - n_yes)
-        if count % 2:
-            answers[-1] = rng.choice(["yes", "no"])
+        # label_balance_pct of them get the first label; when that is not a
+        # whole number of trials, the one left over gets a random label
+        n_first = math.floor(count * share + 1e-9)
+        answers = [first] * n_first + [second] * (count - n_first)
+        if count * share - n_first > 1e-9:
+            answers[-1] = rng.choice([first, second])
         for answer in answers:
             question, was_fresh = _pick(questions, answer, rng, used)
             reused += not was_fresh
@@ -140,11 +153,15 @@ def build_run(questions, cfg, rng, already_seen=()):
 
 def _make_trial(question, condition, spec, cfg, rng, tr, round_tr):
     answer = question["answer"]
-    mode = spec.get("response", "answer")
-    response = {"answer": answer, "opposite": FLIP[answer],
-                "none": None, "ready": "ready"}[mode]
+    first, second = cfg["responses"]["labels"]
+    response = {"answer": answer, "opposite": second if answer == first else first,
+                "none": None, "constant": spec["word"],
+                "ready": spec["word"]}[spec["response"]]
 
-    cue = response.upper() if spec.get("cue_from_response") and response else spec["cue"]
+    cue = spec["cue"]
+    if spec["cue_from_response"] and response:
+        cue = {"upper": response.upper(), "lower": response.lower(),
+               "as_is": response}[cfg["cue"]["token_case"]]
 
     durations = {
         p["name"]: sample_duration(p, rng, tr, round_tr) for p in cfg["trial"]["phases"]
@@ -160,6 +177,6 @@ def _make_trial(question, condition, spec, cfg, rng, tr, round_tr):
         "condition": condition,
         "response_token": response,   # what the participant actually repeats
         "cue": cue,
-        "show_question": spec.get("show_question", True),
+        "show_question": spec["show_question"],
         "durations": durations,
     }

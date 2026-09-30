@@ -2,40 +2,41 @@
 
 params: {"shapes": [{"kind": "triangle", "pos": [0, 0.06], "size": 0.08,
                      "color": "white", "ori": 0}, ...]}
+
+The shape kinds, their defaults and how many are drawn come from `views.shapes`
+in the config.
 """
 from psychopy import visual
 
 from .base import View
 
-EDGES = {"triangle": 3, "square": 4, "diamond": 4, "pentagon": 5,
-         "hexagon": 6, "circle": 64}
-DEFAULT_ORI = {"square": 45.0}     # PsychoPy polygons point up; rotate to square it
-MAX_SHAPES = 6
-
 
 class ShapesView(View):
     def build(self):
+        self.spec = self.cfg["views"]["shapes"]
         self.title = self._text(pos=self.cfg["text"]["title_pos"])
         self.pool = [
-            visual.Polygon(self.win, edges=3, radius=0.08, pos=(0, 0),
-                           fillColor="white", lineColor="white")
-            for _ in range(MAX_SHAPES)
+            visual.Polygon(self.win, edges=3, radius=self.spec["size"], pos=(0, 0),
+                           fillColor=self.spec["color"], lineColor=self.spec["color"])
+            for _ in range(self.spec["max_shapes"])
         ]
         self.active = []
 
     def prepare(self, trial):
         self.title.text = trial["text"]
-        specs = trial["params"].get("shapes", [])[:MAX_SHAPES]
+        edges, ori = self.spec["edges"], self.spec["default_ori"]
+        specs = trial["params"].get("shapes", [])[:self.spec["max_shapes"]]
         self.active = []
         for spec, stim in zip(specs, self.pool):
             kind = spec["kind"]
-            if kind not in EDGES:
-                raise ValueError(f"unknown shape kind `{kind}`")
-            stim.edges = EDGES[kind]
-            stim.radius = spec.get("size", 0.08)
-            stim.ori = spec.get("ori", DEFAULT_ORI.get(kind, 0.0))
+            if kind not in edges:
+                raise ValueError(f"unknown shape kind `{kind}` "
+                                 f"(views.shapes.edges has {', '.join(edges)})")
+            stim.edges = edges[kind]
+            stim.radius = spec.get("size", self.spec["size"])
+            stim.ori = spec.get("ori", ori.get(kind, 0.0))
             stim.pos = spec["pos"]
-            colour = spec.get("color", "white")
+            colour = spec.get("color", self.spec["color"])
             stim.fillColor = colour
             stim.lineColor = colour
             self.active.append(stim)

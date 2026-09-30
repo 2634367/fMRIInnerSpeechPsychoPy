@@ -27,10 +27,10 @@ interpreter bundled inside `/Applications/PsychoPy.app`. You can also open
 | `--no-scanner` | start immediately instead of waiting for trigger pulses |
 | `--windowed` | do not go fullscreen |
 | `--auto` | advance the pre-scan screens with no keypress (display check) |
-| `--pilot` | `--blocks 2 --no-scanner --windowed` |
+| `--pilot` | `--blocks N --no-scanner --windowed`, N from the config's `pilot.blocks` (2) |
 | `--seed N` | fix the RNG; the seed is recorded either way, so any run can be rebuilt |
 | `--quiet` | no terminal readout during the run |
-| `--debug` | testing aids. For now: space pauses the run and space resumes it (see below) |
+| `--debug` | testing aids. For now: the pause key (space) pauses the run and resumes it (see below) |
 | `--overview` / `--no-overview` | draw the overview images before the run (on by default) |
 | `--overview-only` | draw the overview images and exit — no window, nothing written to `data/` |
 
@@ -53,9 +53,43 @@ analyse. A debug run's record has `"debug": true` and lists every pause as
 aborted while paused), and `events.jsonl` gets matching `pause` and `resume`
 events.
 
-A different key can be set as `keys.pause: ["p"]` in the config. It defaults to
-space, which is also the advance key on the instructions screen. That is safe:
-pausing only works after `t0`, and a space pressed before then is discarded.
+A different key can be set as `keys.pause: ["p"]` in the config, and the line's
+text, size and place as `messages.paused`. The key defaults to space, which is
+also the advance key on the instructions screen. That is safe: pausing only
+works after `t0`, and a space pressed before then is discarded.
+
+## Configuration
+
+`config/defaults.yaml` lists every setting the task reads, with its default and
+a comment. Every config — `config/*.yaml` and every config mirrored from the
+planner — is merged over it, so a config only needs the keys it changes:
+
+- mappings merge key by key, so `window: {screen: 1}` changes the screen and
+  keeps every other `window:` setting;
+- a list or a scalar replaces the default outright, and so does the whole
+  `conditions:` block, so a config never inherits conditions it did not list;
+- `~` in `defaults.yaml` marks a key every config must set (`experiment`,
+  `scanner.tr`, `scanner.trigger_key`, `scanner.wait_for_triggers`,
+  `run.n_blocks`, `run.trials_per_block`, `trial.phases`, `conditions`); the
+  loader names any that are missing.
+
+Change a default for every design at once in `defaults.yaml`; change it for one
+design in that design's config. The planner's configs keep working unchanged,
+since anything they leave out comes from `defaults.yaml`. `defaults.yaml` is not
+a config itself: it is never listed, drawn or demoed.
+
+The run record's `config` is the merged result with every default filled in
+(each condition's fields, each screen's font and colour, each jittered phase's
+`p` or `scale`), so it always says exactly what ran. With the defaults as
+shipped, a seed builds exactly the run it built before `defaults.yaml` existed.
+
+The values that are not in the config are the task's vocabulary: the `show`
+kinds `question`, `cue` and `blank`, the jitter and response kinds, the views,
+and the names of events and record fields.
+
+Watch YAML's booleans: bare `yes`, `no`, `on` and `off` are read as true and
+false, so quote words like these (`labels: ["yes", "no"]`, `word: "yes"`). The
+loader says so if it gets one.
 
 ## Run from the planner
 
@@ -205,8 +239,9 @@ Drawing takes a few seconds. If it fails for any reason, the console prints
 `overview  skipped - …` and the run goes ahead. A config that does not load gets
 a placeholder image naming the error, and the other configs are still drawn.
 `run:` keys that the task does not implement (`inter_block_rest`,
-`inter_trial_gap`, `label_*`) are listed in a footnote and left out of every
-length shown.
+`inter_trial_gap`, `label_order`, `label_run_length`) are listed in a footnote
+and left out of every length shown. A `run:` key counts as implemented when
+`config/defaults.yaml` has it.
 
 ## The operator console
 
@@ -251,7 +286,8 @@ keeping a text log of the session.
 ## Layout
 
 ```
-config/experiment.yaml   all settings — timing, window, conditions, scanner
+config/defaults.yaml     every setting with its default; every config is merged over it
+config/experiment.yaml   the default design — timing, window, conditions, scanner
 config/experiment-*.yaml one per analysis aim (glm, mvpa, time-series); pick with --config
 config/planner/<design>/ configs mirrored from the design planner (`planner`)
 questions/bank.json      the question bank
@@ -279,10 +315,14 @@ Everything the task produces goes to `data/`, and every write goes through
   trigger pulses, scan start, each trial phase with its measured onset and
   offset, aborts. Flushed on every write, so a crash still leaves a full record.
 - **`data/runs/<run_id>.json`** — one self-contained record per run: participant,
-  session, run, RNG seed, a snapshot of the config that produced it, all trigger
-  times, and every trial with its scheduled durations and measured onsets.
+  session, run, RNG seed, a snapshot of the merged config that produced it, all
+  trigger times, the lead-in and lead-out (`{name, show, dur, onset, offset}`),
+  and every trial with its scheduled durations and measured onsets.
 
-`run_id` is `sub-<participant>_ses-NN_run-NN`.
+`run_id` is `sub-<participant>_ses-NN_run-NN`, from `paths.run_id`
+(`"sub-{participant}_ses-{session:02d}_run-{run:02d}"`). The `lead_in` and
+`lead_out` events keep those kinds whatever the phases are called, and carry
+the phase's `name` and `show` and its measured `onset` and `offset`.
 
 Onsets are seconds from the last dummy-volume trigger, so they drop straight
 into a GLM design matrix. Each trial records both `answer` (the truth of the
@@ -329,6 +369,9 @@ to reuse, and records how many were reused as `questions_reused`.
 | `image` | text at top + an image | `image: "file.png"`, `size: [w, h]` |
 
 Shape kinds: `triangle`, `square`, `diamond`, `pentagon`, `hexagon`, `circle`.
+They, and a shape's default size, colour and orientation, and how many a
+question may draw, are `views.shapes` in the config. `views.text.pos` and
+`views.image.pos` place the text-only question and the picture.
 
 Most question families only need words, so they share `text`. To add a view:
 subclass `View` (implement `build`, `prepare`, `draw`), register it in
@@ -358,16 +401,36 @@ trial:
     - {name: fixation_post, show: fixation, dur: [2.0, 6.0]}
 ```
 
-A scalar `dur` is fixed; a `[lo, hi]` pair is jittered. `show` is one of
-`fixation`, `question`, `cue`, `blank`.
+A scalar `dur` is fixed; a `[lo, hi]` pair is jittered. `show` is `question`,
+`cue`, `blank`, `fixation`, or any screen under `screens:`, a line of text of
+your own:
 
-`trial.jitter` sets how every `[lo, hi]` phase is sampled, and a phase can
-override it with its own `jitter:` (and `p:`):
+```yaml
+screens:
+  rest: {text: "·", height: 0.05, color: [0.5, 0.5, 0.5]}   # font and pos from text:
+```
+
+The lead-in and lead-out are phases too. A bare number sets only the duration,
+as before; the full form sets what is on screen, what the console, the overview
+and the demo call it, and jitter:
+
+```yaml
+run:
+  lead_in:  12.0
+  lead_out: {name: settle_out, show: rest, dur: [8.0, 16.0], jitter: geometric}
+```
+
+A lead can show `blank` or any screen, but not the question or the cue, since it
+belongs to no trial. A jittered lead is drawn after the trials, so a fixed lead
+leaves the rest of the run exactly as it was.
+
+`trial.jitter` sets how every `[lo, hi]` phase (leads included) is sampled, and a
+phase can override it with its own `jitter:` (and `p:` or `scale:`):
 
 | jitter | draws |
 |---|---|
 | `geometric` | `lo` plus *n* whole TRs, P(*n*) ∝ `p`(1 − `p`)^*n*, capped at `hi` — the truncated geometric (textbook eq. 5.3). Memoryless, so the participant cannot predict the next event; `jitter_p` (default 0.5) is the chance it comes on the next TR. Needs `hi − lo` ≥ one TR |
-| `exponential` | truncated exponential over `[lo, hi]` — short gaps more common |
+| `exponential` | truncated exponential over `[lo, hi]` — short gaps more common. `trial.exponential_scale` (default 0.35) is its mean above `lo` as a share of `hi − lo` |
 | `uniform` | uniform over `[lo, hi]` — the default when `jitter` is not set |
 
 `round_jitter_to_tr` snaps `uniform` and `exponential` draws to the TR grid;
@@ -377,15 +440,32 @@ rather than falling back to uniform.
 ## Conditions
 
 `per_run` counts must sum to the run's trial count; the loader refuses to start
-otherwise. Labels are balanced within every condition.
+otherwise. Within every condition, `run.label_balance_pct` of the trials (50 by
+default) get the first answer label; when that is not a whole number of trials,
+the one left over gets a random label.
 
 | condition | question shown | participant repeats |
 |---|---|---|
 | `primary` | yes | the correct answer |
 | `passive_read` | yes | nothing (silent) |
 | `cue_only` | no | the answer, displayed on the cue itself |
-| `constant_word` | yes | the constant word "ready" |
+| `constant_word` | yes | the constant word, `word` ("ready" by default) |
 | `opposite` | yes | the inverted answer |
+
+Each condition sets `per_run` and `cue`; the rest comes from
+`condition_defaults`:
+
+```yaml
+condition_defaults:
+  show_question: true
+  response: answer          # answer | opposite | none | constant (`ready` reads as constant)
+  word: ready               # what `constant` trials repeat
+  cue_from_response: false  # the cue shows the token, cased by cue.token_case
+```
+
+The two answers are `responses.labels` (`["yes", "no"]`); every question in the
+bank must have one of them, and `opposite` swaps them. `responses.silent_label`
+is how a silent trial reads in the console and the demo.
 
 ## Before the scanner
 

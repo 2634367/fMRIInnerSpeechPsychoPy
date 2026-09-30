@@ -49,7 +49,7 @@ class BadRequest(Exception):
 # --------------------------------------------------------------- catalog ---
 def local_configs(root):
     """Short name -> path; `experiment`, the task's default, first."""
-    found = {config.short_name(p): p for p in (Path(root) / "config").glob("*.yaml")}
+    found = config.local_configs(Path(root) / "config")
     return {k: found[k] for k in sorted(found, key=lambda k: (k != "experiment", k))}
 
 
@@ -89,15 +89,16 @@ def summary(path, root, cfg_root=None, overview_png=None):
                            "jitter": p.get("jitter") if hi > lo else None,
                            "p": p.get("p") if hi > lo else None})
         n = run["n_blocks"] * run["trials_per_block"]
-        lead = run["lead_in"] + run["lead_out"]
+        leads = [bank.bounds(run[k], tr) for k in config.LEADS]
         item.update(
             experiment=cfg.get("experiment"), tr=tr,
             trigger_key=scanner["trigger_key"], dummies=scanner["wait_for_triggers"],
             n_blocks=run["n_blocks"], per_block=run["trials_per_block"], n_trials=n,
             lead_in=run["lead_in"], lead_out=run["lead_out"], phases=phases,
-            run_len=[round(lead + n * sum(p[k] for p in phases), 2) for k in ("lo", "hi")],
+            run_len=[round(sum(b[i] for b in leads) + n * sum(p[k] for p in phases), 2)
+                     for i, k in enumerate(("lo", "hi"))],
             conditions={k: c["per_run"] for k, c in cfg["conditions"].items()},
-            ignored=sorted(f"run.{k}" for k in set(run) - config.RUN_KEYS))
+            ignored=config.ignored(cfg))
     except Exception as exc:  # noqa: BLE001 - one bad config must not hide the others
         item["error"] = f"{type(exc).__name__}: {exc}"
     return item
@@ -218,19 +219,19 @@ def plan(root, body):
     seed = (random.SystemRandom().randrange(2 ** 31) if seed in (None, "")
             else _integer(seed, "seed", 0))
 
-    questions = bank.load(cfg.path("bank"))
+    questions = bank.load(cfg.path("bank"), cfg["responses"]["labels"])
     # no already_seen: a demo is a fresh participant, so the same seed rebuilds
     # this run in PsychoPy for anyone without earlier runs
-    trials, reused = bank.build_run(questions, cfg, random.Random(seed))
+    rng = random.Random(seed)
+    trials, reused = bank.build_run(questions, cfg, rng)
+    leads = bank.lead_durations(cfg, rng)          # after the trials, as session.py
     images = cfg.path("images_dir")
     for trial in trials:
         if trial["view"] == "image":
             trial["image_url"] = file_url(images / trial["params"].get("image", ""), root)
-    run = cfg["run"]
-    total = run["lead_in"] + run["lead_out"] + sum(sum(t["durations"].values())
-                                                   for t in trials)
+    total = sum(leads.values()) + sum(sum(t["durations"].values()) for t in trials)
     return {"seed": seed, "source": {**source, "file": _relative(path, root)},
-            "cfg": dict(cfg), "trials": trials, "reused": reused,
+            "cfg": dict(cfg), "trials": trials, "leads": leads, "reused": reused,
             "n_questions": len(questions), "total": round(total, 4)}
 
 

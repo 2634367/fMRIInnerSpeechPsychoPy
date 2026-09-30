@@ -27,7 +27,6 @@ from matplotlib.ticker import MultipleLocator, PercentFormatter
 
 from . import bank, config
 from .console import _clock
-from .views.shapes_view import DEFAULT_ORI, EDGES, MAX_SHAPES
 
 SEED = 1                  # example runs and jitter draws; any fixed value will do
 DRAWS = 20000             # jitter samples per phase
@@ -43,13 +42,15 @@ SURFACE, INK, INK2, MUTED = WSU_OFF_WHITE, WSU_BLACK, "#484E54", "#767A7E"
 TITLE, GRID, AXIS, HIGHLIGHT = WSU_DARK_GREEN, WSU_FADED_GOLD, WSU_BEIGE, WSU_YELLOW
 # one colour per phase `show` kind, the same in every image. Green and gold carry
 # the two events; fixation (WSU black at 52%) and blank stay recessive. Every
-# pair clears the colour-blind and normal-vision separation checks.
+# pair clears the colour-blind and normal-vision separation checks. A screen
+# from the config's `screens:` is text like the fixation cross, and shares its
+# colour.
 SHOW_COLOUR = {"fixation": "#7D8185", "question": WSU_GREEN,
                "blank": WSU_FADED_GOLD, "cue": WSU_GOLD}
 SHOW_LABEL = {"fixation": "fixation cross", "question": "question",
               "blank": "blank screen", "cue": "answer cue"}
 RESPONSE = {"answer": "repeats the answer", "opposite": "repeats the opposite",
-            "none": "stays silent", "ready": 'repeats "ready"'}
+            "none": "stays silent"}
 VIEW_ORDER = ("text", "shapes", "image")
 FALLBACK_FONT = "DejaVu Sans"            # has the cue glyphs ● ○ ◆ ▲ ✖
 RC = {"font.family": ["Arial", FALLBACK_FONT], "font.size": 10,
@@ -83,6 +84,17 @@ def write_all(configs, out_dir, selected=None, root=None):
     return written
 
 
+def _kind(show):
+    """The colour key of a `show` value: a custom screen counts as fixation."""
+    return show if show in SHOW_COLOUR else "fixation"
+
+
+def _response(c):
+    if c["response"] in ("constant", "ready"):
+        return f'repeats "{c["word"]}"'
+    return RESPONSE[c["response"]]
+
+
 def _save(fig, path):
     fig.savefig(path, dpi=DPI, facecolor=SURFACE)
     return path
@@ -97,8 +109,10 @@ class Design:
         try:
             self.cfg = cfg = config.load(path, root)
             self.where = _relative(self.path, cfg.root)
-            questions = bank.load(cfg.path("bank"))
-            self.trials, _ = bank.build_run(questions, cfg, random.Random(SEED))
+            questions = bank.load(cfg.path("bank"), cfg["responses"]["labels"])
+            rng = random.Random(SEED)
+            self.trials, _ = bank.build_run(questions, cfg, rng)
+            self.leads = bank.lead_durations(cfg, rng)
         except Exception as exc:        # one bad config must not stop the others
             self.error = f"{type(exc).__name__}: {exc}"
             return
@@ -106,29 +120,32 @@ class Design:
         run, self.tr = cfg["run"], cfg["scanner"]["tr"]
         self.n_trials = run["n_blocks"] * run["trials_per_block"]
         rng = random.Random(SEED)
-        round_tr = cfg["trial"].get("round_jitter_to_tr", False)
-        self.phases = []
-        for phase in cfg["trial"]["phases"]:
-            lo, hi = bank.bounds(phase, self.tr)
-            draws = ([bank.sample_duration(phase, rng, self.tr, round_tr)
-                      for _ in range(DRAWS)] if hi > lo else [lo])
-            self.phases.append({**phase, "lo": lo, "hi": hi, "draws": draws,
-                                "mean": sum(draws) / len(draws)})
-        self.jittered = [p for p in self.phases if p["hi"] > p["lo"]]
+        self.phases = [self._stats(p, rng) for p in cfg["trial"]["phases"]]
+        lead_stats = [self._stats(run[k], rng) for k in config.LEADS]
+        self.jittered = [p for p in self.phases + lead_stats if p["hi"] > p["lo"]]
 
-        lead = run["lead_in"] + run["lead_out"]
         self.trial_len = [sum(p[k] for p in self.phases) for k in ("lo", "mean", "hi")]
-        self.run_len = [lead + self.n_trials * t for t in self.trial_len]
+        self.run_len = [sum(p[k] for p in lead_stats) + self.n_trials * t
+                        for k, t in zip(("lo", "mean", "hi"), self.trial_len)]
         self.segments = self._timeline()
         self.example_len = self.segments[-1]["t0"] + self.segments[-1]["dur"]
-        self.ignored = sorted(f"run.{k}" for k in set(run) - config.RUN_KEYS)
+        self.ignored = config.ignored(cfg)
+
+    def _stats(self, phase, rng):
+        """A phase with its bounds and a sample of the task's own draws."""
+        lo, hi = bank.bounds(phase, self.tr)
+        draws = ([bank.sample_duration(phase, rng, self.tr,
+                                       self.cfg["trial"]["round_jitter_to_tr"])
+                  for _ in range(DRAWS)] if hi > lo else [lo])
+        return {**phase, "lo": lo, "hi": hi, "draws": draws,
+                "mean": sum(draws) / len(draws)}
 
     def _timeline(self):
         """Every on-screen segment of the example run, lead-in to lead-out."""
         run = self.cfg["run"]
-        segs = [{"t0": 0.0, "dur": run["lead_in"], "show": "fixation",
-                 "kind": "lead-in", "trial": None}]
-        t = run["lead_in"]
+        segs = [{"t0": 0.0, "dur": self.leads["lead_in"], "show": run["lead_in"]["show"],
+                 "kind": "lead", "name": run["lead_in"]["name"], "trial": None}]
+        t = self.leads["lead_in"]
         for trial in self.trials:
             for phase in self.cfg["trial"]["phases"]:
                 show = phase["show"]
@@ -138,8 +155,8 @@ class Design:
                 segs.append({"t0": t, "dur": dur, "show": show,
                              "kind": phase["show"], "trial": trial})
                 t += dur
-        segs.append({"t0": t, "dur": run["lead_out"], "show": "fixation",
-                     "kind": "lead-out", "trial": None})
+        segs.append({"t0": t, "dur": self.leads["lead_out"], "show": run["lead_out"]["show"],
+                     "kind": "lead", "name": run["lead_out"]["name"], "trial": None})
         return segs
 
     def example(self, **match):
@@ -213,8 +230,13 @@ def _section(sheet, top, title, note):
     sheet.text(M, top + 0.27, note, fontsize=9.5, color=MUTED)
 
 
-def _phase_legend(sheet, left, top, kinds):
-    sheet.legend(left, top, [Patch(color=SHOW_COLOUR[k], label=SHOW_LABEL[k])
+def _phase_legend(sheet, left, top, shows):
+    """One swatch per colour; the fixation swatch also names any custom screens."""
+    custom = sorted(s for s in shows if s not in SHOW_COLOUR)
+    labels = {**SHOW_LABEL, "fixation": ", ".join(
+        ([SHOW_LABEL["fixation"]] if "fixation" in shows else []) + custom)}
+    kinds = {_kind(s) for s in shows}
+    sheet.legend(left, top, [Patch(color=SHOW_COLOUR[k], label=labels[k])
                              for k in SHOW_COLOUR if k in kinds])
 
 
@@ -250,36 +272,40 @@ def _screen(ax, cfg, show, trial=None):
     pt = ax.get_position().height * ax.figure.get_figheight() * 72   # points per unit
     font = [cfg["text"]["font"], FALLBACK_FONT]
 
-    def say(text, pos, height, colour, wrap=None):
+    def say(text, pos, height, colour, wrap=None, family=None):
         if wrap:
             text = textwrap.fill(text, max(8, int(wrap / (0.5 * height))))
         ax.text(*pos, text, ha="center", va="center", fontsize=height * pt,
-                color=_rgb(colour), fontfamily=font, linespacing=1.15)
+                color=_rgb(colour), linespacing=1.15,
+                fontfamily=[family, FALLBACK_FONT] if family else font)
 
-    t = cfg["text"]
-    if show == "fixation":
-        f = cfg["fixation"]
-        say(f["text"], (0, 0), f["height"], f["color"])
+    t, views = cfg["text"], cfg["views"]
+    if show in cfg["screens"]:
+        s = cfg["screens"][show]
+        say(s["text"], s["pos"], s["height"], s["color"], family=s["font"])
     elif show == "cue" and trial:
-        say(trial["cue"], (0, 0), cfg["cue"]["height"], cfg["cue"]["color"])
+        say(trial["cue"], cfg["cue"]["pos"], cfg["cue"]["height"], cfg["cue"]["color"])
     elif show == "question" and trial and trial["show_question"]:
         if trial["view"] == "text":
-            say(trial["text"], (0, 0), t["height"], t["color"], t["wrap_width"])
+            say(trial["text"], views["text"]["pos"], t["height"], t["color"],
+                t["wrap_width"])
             return
         say(trial["text"], t["title_pos"], t["height"], t["color"], t["wrap_width"])
         params = trial["params"]
         if trial["view"] == "shapes":
-            for spec in params.get("shapes", [])[:MAX_SHAPES]:
-                colour = _rgb(spec.get("color", "white"))
-                ori = spec.get("ori", DEFAULT_ORI.get(spec["kind"], 0.0))
+            shapes = views["shapes"]
+            for spec in params.get("shapes", [])[:shapes["max_shapes"]]:
+                colour = _rgb(spec.get("color", shapes["color"]))
+                ori = spec.get("ori", shapes["default_ori"].get(spec["kind"], 0.0))
                 # both start with a vertex straight up; PsychoPy turns clockwise
                 ax.add_patch(RegularPolygon(
-                    spec["pos"], EDGES[spec["kind"]], radius=spec.get("size", 0.08),
+                    spec["pos"], shapes["edges"][spec["kind"]],
+                    radius=spec.get("size", shapes["size"]),
                     orientation=-radians(ori), color=colour))
         elif trial["view"] == "image":
             image = imread(cfg.path("images_dir") / params["image"])
             iw, ih = params.get("size") or (image.shape[1] / h, image.shape[0] / h)
-            x, y = 0, -0.05
+            x, y = views["image"]["pos"]
             ax.imshow(image, extent=(x - iw / 2, x + iw / 2, y - ih / 2, y + ih / 2),
                       aspect="auto")
             ax.set_xlim(-half, half)
@@ -349,7 +375,7 @@ def _anatomy(sheet, d, top):
     start = 0.0
     for i, p in enumerate(d.phases):
         ax.broken_barh([(start, max(p["mean"] - gap, p["mean"] / 2))], (0.3, 0.45),
-                       facecolors=SHOW_COLOUR[p["show"]])
+                       facecolors=SHOW_COLOUR[_kind(p["show"])])
         ax.text(start + p["mean"] / 2, 0.85, str(i + 1), ha="center", va="bottom",
                 fontsize=9.5, color=INK2)
         if p["hi"] > p["lo"]:
@@ -437,12 +463,12 @@ def _raster(sheet, d, top):
     glyphs = "    ".join(f"{c['cue']} {name}" for name, c in d.cfg["conditions"].items())
     sheet.text(M + 7.2, top + 0.655, glyphs, fontsize=9.5, color=INK2)
 
-    rows = [("lead-in", [d.segments[0]])]
+    rows = [(d.segments[0]["name"], [d.segments[0]])]
     blocks = {}
     for seg in d.segments[1:-1]:
         blocks.setdefault(seg["trial"]["block"], []).append(seg)
     rows += [(f"block {b + 1}", segs) for b, segs in sorted(blocks.items())]
-    rows.append(("lead-out", [d.segments[-1]]))
+    rows.append((d.segments[-1]["name"], [d.segments[-1]]))
 
     label_w = 1.35
     ax = sheet.axes(M + label_w, top + 1.0, INNER - label_w, len(rows) * 0.27)
@@ -455,7 +481,7 @@ def _raster(sheet, d, top):
         labels.append(f"{name}  {_clock(t0)}")
         for show in SHOW_COLOUR:
             spans = [(s["t0"] - t0, max(s["dur"] - gap, s["dur"] / 2))
-                     for s in segs if s["show"] == show]
+                     for s in segs if _kind(s["show"]) == show]
             if spans:
                 ax.broken_barh(spans, (y - 0.32, 0.64), facecolors=SHOW_COLOUR[show])
         for s in segs:
@@ -469,7 +495,7 @@ def _raster(sheet, d, top):
                         color=SURFACE if s["show"] == "question" else INK)
         if segs[0]["trial"] is None:
             ax.text(segs[0]["dur"] + xmax * 0.01, y,
-                    f"{segs[0]['dur']:g} s of fixation", va="center",
+                    f"{segs[0]['dur']:g} s of {segs[0]['show']}", va="center",
                     fontsize=9, color=MUTED)
     ax.set_ylim(len(rows) - 0.5, -0.5)
     ax.set_yticks(range(len(rows)), labels)
@@ -491,9 +517,9 @@ def _conditions(sheet, d, top):
     for y, name in enumerate(names):
         c = conds[name]
         ax.barh(y, c["per_run"], height=0.5, color=INK2)
-        cue = (" · cue shows the token" if c.get("cue_from_response") else "")
-        detail = (f"question {'shown' if c.get('show_question', True) else 'hidden'}"
-                  f" · {RESPONSE[c.get('response', 'answer')]}{cue}")
+        cue = (" · cue shows the token" if c["cue_from_response"] else "")
+        detail = (f"question {'shown' if c['show_question'] else 'hidden'}"
+                  f" · {_response(c)}{cue}")
         ax.text(c["per_run"] + biggest * 0.03, y,
                 f"{c['per_run']}  ({c['per_run'] / d.n_trials:.0%})    {detail}",
                 va="center", fontsize=9.5, color=INK2)
@@ -536,7 +562,9 @@ def _global_sheet(designs, selected):
     sheet.text(M, top + 0.45, f"{n} configs in config/  ·  ▶ marks the one "
                "selected with --config  ·  one image per config sits beside this one",
                fontsize=10.5, color=INK2)
-    _phase_legend(sheet, M, top + 0.8, set(SHOW_COLOUR))
+    _phase_legend(sheet, M, top + 0.8,
+                  set(SHOW_COLOUR) | {s["show"] for d in designs if not d.error
+                                      for s in d.segments})
     top += sections[0]
 
     _table(sheet, designs, selected, top)
@@ -637,7 +665,7 @@ def _compare_trials(sheet, designs, selected, top):
         start = 0.0
         for p in d.phases:
             ax.broken_barh([(start, max(p["mean"] - gap, p["mean"] / 2))],
-                           (y - 0.32, 0.4), facecolors=SHOW_COLOUR[p["show"]])
+                           (y - 0.32, 0.4), facecolors=SHOW_COLOUR[_kind(p["show"])])
             start += p["mean"]
         lo, mean, hi = d.trial_len
         ax.plot([lo, hi], [y + 0.24] * 2, color=INK2, lw=1)
@@ -686,7 +714,8 @@ def _compare_strips(sheet, designs, selected, top):
     xmax = max(d.run_len[2] for d in designs) / 60 * 1.02
     for y, d in enumerate(designs):
         for show in SHOW_COLOUR:
-            spans = [(s["t0"] / 60, s["dur"] / 60) for s in d.segments if s["show"] == show]
+            spans = [(s["t0"] / 60, s["dur"] / 60) for s in d.segments
+                     if _kind(s["show"]) == show]
             if spans:
                 ax.broken_barh(spans, (y - 0.3, 0.6), facecolors=SHOW_COLOUR[show])
         shown = sum(s["dur"] for s in d.segments if s["show"] in ("question", "cue"))

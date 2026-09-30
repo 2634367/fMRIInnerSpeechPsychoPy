@@ -8,13 +8,12 @@
 //
 // The run clock is virtual so a demo can go faster than real time, pause (t0
 // moves forward, as with --debug), or skip a phase. Nothing is recorded.
+//
+// Everything on screen comes from the merged config (plan.cfg, over
+// config/defaults.yaml), as it does in PsychoPy.
 
 import { badge, clock } from './feed.js';
 
-// innerspeech/views/shapes_view.py
-const EDGES = { triangle: 3, square: 4, diamond: 4, pentagon: 5, hexagon: 6, circle: 64 };
-const DEFAULT_ORI = { square: 45 };
-const MAX_SHAPES = 6;
 const SVG = 'http://www.w3.org/2000/svg';
 const TICK_MS = 100;                     // live state to the popup, like console.refresh_hz: 10
 export const SPEEDS = [1, 2, 5, 10, 30];
@@ -39,6 +38,9 @@ function css(colour) {
 }
 
 const round4 = (x) => Math.round(x * 1e4) / 1e4;
+
+/** Python's str.format for plain `{name}` fields, as the config's messages use. */
+const format = (template, vars) => String(template).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
 
 /** Run-clock seconds: base + real time since anchor × speed; frozen while paused. */
 class RunClock {
@@ -78,9 +80,9 @@ export class Stage {
     const cfg = this.cfg = plan.cfg;
     this.trials = plan.trials;
     this.keys = {
-      quit: cfg.keys?.quit ?? ['escape'],
-      advance: cfg.keys?.advance ?? ['space'],
-      pause: cfg.keys?.pause ?? ['space'],
+      quit: cfg.keys.quit,
+      advance: cfg.keys.advance,
+      pause: cfg.keys.pause,
       trigger: String(cfg.scanner.trigger_key),
     };
     this.clock = new RunClock(opts.speed || 1);
@@ -123,9 +125,10 @@ export class Stage {
 
   /** Every on-screen segment, lead-in to lead-out, as overview.Design._timeline. */
   _schedule() {
-    const run = this.cfg.run;
-    const segs = [{ t0: 0, t1: run.lead_in, show: 'fixation', name: 'lead-in', trial: null }];
-    let cursor = run.lead_in;
+    const { lead_in: li, lead_out: lo } = this.cfg.run;
+    const leads = this.plan.leads;       // drawn by bank.lead_durations, as session.py
+    const segs = [{ t0: 0, t1: leads.lead_in, show: li.show, name: li.name, trial: null }];
+    let cursor = round4(leads.lead_in);
     for (const trial of this.trials) {
       trial.t_start = round4(cursor);
       for (const phase of this.cfg.trial.phases) {
@@ -137,8 +140,8 @@ export class Stage {
       }
       cursor = round4(cursor);           // trial["t_end"] = round(cursor, 4)
     }
-    segs.push({ t0: cursor, t1: cursor + run.lead_out, show: 'fixation', name: 'lead-out', trial: null });
-    this.total = cursor + run.lead_out;
+    segs.push({ t0: cursor, t1: cursor + leads.lead_out, show: lo.show, name: lo.name, trial: null });
+    this.total = cursor + leads.lead_out;
     return segs;
   }
 
@@ -155,7 +158,7 @@ export class Stage {
 
     this.svg = document.createElementNS(SVG, 'svg');
     this.svg.classList.add('shapes');
-    this.polys = Array.from({ length: MAX_SHAPES }, () => {
+    this.polys = Array.from({ length: cfg.views.shapes.max_shapes }, () => {
       const p = document.createElementNS(SVG, 'polygon');
       this.svg.append(p);
       return p;
@@ -164,7 +167,7 @@ export class Stage {
     this.img.className = 'image';
     this.img.alt = '';
 
-    const el = (x, y, h, colour, wrap) => {
+    const el = ([x, y], h, colour, wrap, family) => {
       const e = document.createElement('div');
       e.className = 'el';
       e.style.setProperty('--x', x);
@@ -172,17 +175,25 @@ export class Stage {
       e.style.setProperty('--h', h);
       if (wrap) e.style.setProperty('--w', wrap);
       e.style.color = css(colour);
+      e.style.textAlign = cfg.text.align;
+      if (family) e.style.fontFamily = `"${family}", ${font}`;
       return e;
     };
     const t = cfg.text;
-    this.fixation = el(0, 0, cfg.fixation.height, cfg.fixation.color);
-    this.fixation.textContent = cfg.fixation.text;
-    this.cue = el(0, 0, cfg.cue.height, cfg.cue.color);
-    this.message = el(0, 0, t.height, t.color, t.wrap_width);
-    this.qtext = el(0, 0, t.height, t.color, t.wrap_width);
-    this.paused = el(0, -0.42, t.height * 0.6, t.color);
-    this.paused.textContent = `paused - ${this.keys.pause.join('/')} to resume`;
-    screen.append(this.svg, this.img, this.fixation, this.cue, this.qtext, this.message, this.paused);
+    // fixation and every other `screens:` entry
+    this.screens = Object.fromEntries(Object.entries(cfg.screens).map(([name, s]) => {
+      const e = el(s.pos, s.height, s.color, null, s.font);
+      e.textContent = s.text;
+      return [name, e];
+    }));
+    this.cue = el(cfg.cue.pos, cfg.cue.height, cfg.cue.color);
+    this.message = el([0, 0], t.height, t.color, t.wrap_width);
+    this.qtext = el([0, 0], t.height, t.color, t.wrap_width);
+    const p = cfg.messages.paused;
+    this.paused = el(p.pos, p.height, p.color, null, p.font);
+    this.paused.textContent = format(p.text, { keys: this.keys.pause.join('/') });
+    screen.append(this.svg, this.img, ...Object.values(this.screens), this.cue, this.qtext,
+      this.message, this.paused);
 
     this.hudEl = document.createElement('div');
     this.hudEl.className = 'hud';
@@ -235,29 +246,31 @@ export class Stage {
 
   // ============================================================== drawing ===
   _paint(show, trial) {
-    for (const e of [this.fixation, this.cue, this.qtext, this.message]) e.hidden = true;
+    for (const e of [...Object.values(this.screens), this.cue, this.qtext, this.message]) e.hidden = true;
     for (const p of this.polys) p.setAttribute('points', '');
     this.img.hidden = true;
-    if (show === 'fixation') this.fixation.hidden = false;
+    if (this.screens[show]) this.screens[show].hidden = false;
     else if (show === 'cue') { this.cue.textContent = trial.cue; this.cue.hidden = false; }
     else if (show === 'question') this._question(trial);
-    else if (show === 'message') this.message.hidden = false;
+    else if (show === '@message') this.message.hidden = false;   // instructions and pulses; '@' keeps it apart from screen names
   }
 
   _question(trial) {
     const t = this.cfg.text;
     const view = trial.view;
-    const [x, y] = view === 'text' ? [0, 0] : t.title_pos;
+    const [x, y] = view === 'text' ? this.cfg.views.text.pos : t.title_pos;
     this.qtext.style.setProperty('--x', x);
     this.qtext.style.setProperty('--y', y);
     this.qtext.textContent = trial.text;
     this.qtext.hidden = false;
     if (view === 'shapes') {
-      (trial.params.shapes || []).slice(0, MAX_SHAPES).forEach((spec, i) => {
-        const edges = EDGES[spec.kind] ?? 3;
-        const r = spec.size ?? 0.08;
+      const shapes = this.cfg.views.shapes;
+      (trial.params.shapes || []).slice(0, shapes.max_shapes).forEach((spec, i) => {
+        const edges = shapes.edges[spec.kind];
+        if (!edges) { this._toast(`unknown shape kind "${spec.kind}" (PsychoPy would stop here)`); return; }
+        const r = spec.size ?? shapes.size;
         // first vertex straight up; PsychoPy's ori turns clockwise
-        const ori = ((spec.ori ?? DEFAULT_ORI[spec.kind] ?? 0) * Math.PI) / 180;
+        const ori = ((spec.ori ?? shapes.default_ori[spec.kind] ?? 0) * Math.PI) / 180;
         const [px, py] = spec.pos;
         const pts = [];
         for (let e = 0; e < edges; e++) {
@@ -266,8 +279,8 @@ export class Stage {
         }
         const poly = this.polys[i];
         poly.setAttribute('points', pts.join(' '));
-        poly.setAttribute('fill', css(spec.color ?? 'white'));
-        poly.setAttribute('stroke', css(spec.color ?? 'white'));
+        poly.setAttribute('fill', css(spec.color ?? shapes.color));
+        poly.setAttribute('stroke', css(spec.color ?? shapes.color));
         poly.setAttribute('stroke-width', '0.002');
       });
     } else if (view === 'image' && trial.image_url) {
@@ -280,7 +293,7 @@ export class Stage {
     }
   }
 
-  /** ImageStim at (0, -0.05): params.size, else its pixels ÷ window height. */
+  /** ImageStim at views.image.pos: params.size, else its pixels ÷ window height. */
   _sizeImage() {
     const trial = this.imgTrial;
     if (!trial || this.img.hidden) return;
@@ -291,9 +304,10 @@ export class Stage {
       if (!im?.naturalWidth) { im?.addEventListener('load', () => this._sizeImage(), { once: true }); return; }
       [w, h] = [im.naturalWidth / winH, im.naturalHeight / winH];
     }
+    const [x, y] = this.cfg.views.image.pos;
     Object.assign(this.img.style, {
       width: `${w * this.unit}px`, height: `${h * this.unit}px`,
-      left: '50%', top: `calc(50% + ${0.05 * this.unit}px)`,
+      left: `calc(50% + ${x * this.unit}px)`, top: `calc(50% - ${y * this.unit}px)`,
     });
   }
 
@@ -313,10 +327,10 @@ export class Stage {
 
   _instructions() {
     this.message.textContent = this.cfg.instructions || '';
-    this._paint('message');
+    this._paint('@message');
     this._setState('instructions', this.opts.auto ? 'auto-advancing'
       : `press ${this.keys.advance.join('/')}`);
-    if (this.opts.auto) this.timer = setTimeout(() => this._waitForScanner(), 1000);
+    if (this.opts.auto) this.timer = setTimeout(() => this._waitForScanner(), this.cfg.pilot.auto_advance * 1000);
   }
 
   _waitForScanner() {
@@ -336,8 +350,8 @@ export class Stage {
 
   _showPulses() {
     const n = this.cfg.scanner.wait_for_triggers;
-    this.message.textContent = `Waiting for the scanner…\n\n${this.pulses} / ${n} pulses`;
-    this._paint('message');
+    this.message.textContent = format(this.cfg.messages.waiting, { seen: this.pulses, total: n });
+    this._paint('@message');
   }
 
   _simulatePulse() {
@@ -602,10 +616,17 @@ export class Stage {
     return iv.length ? 1000 / (iv.reduce((a, b) => a + b, 0) / iv.length) : 0;
   }
 
+  /** The token's colour role: the first answer label, the second, a constant word, or silence. */
+  _role(token) {
+    const [first, second] = this.cfg.responses.labels;
+    return token == null ? 'none' : token === first ? 'first' : token === second ? 'second' : 'constant';
+  }
+
   _brief(trial) {
     return {
       i: trial.trial, n: this.trials.length, block: trial.block, n_blocks: this.cfg.run.n_blocks,
       condition: trial.condition, answer: trial.answer, token: trial.response_token,
+      role: this._role(trial.response_token), silent: this.cfg.responses.silent_label,
       text: trial.text, show_question: trial.show_question, view: trial.view, cue: trial.cue,
       family: trial.family, category: trial.category, uuid: trial.question_uuid,
       t_start: trial.t_start,
@@ -646,7 +667,7 @@ export class Stage {
     } else {
       const pct = Math.min(100, Math.round((L.t / L.total) * 100));
       lines.push(`run    ${clock(L.t)} / ${clock(L.total)}  ${String(pct).padStart(3)}%   `
-        + (L.now ? `trial ${L.now.i + 1}/${L.n_trials}  block ${L.now.block + 1}/${L.n_blocks}` : 'lead-in'));
+        + (L.now ? `trial ${L.now.i + 1}/${L.n_trials}  block ${L.now.block + 1}/${L.n_blocks}` : (L.span?.name ?? this.cfg.run.lead_in.name)));   // outside a trial: the lead-in or lead-out
       if (L.span) {
         const left = Math.max(0, L.span.t1 - L.t);
         lines.push(`phase  ${L.span.name}  ${left.toFixed(1)} s left`);
