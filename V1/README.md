@@ -214,7 +214,8 @@ A tab in the background gets no frames from the browser, so its phases are
 skipped; the log says so rather than hiding it.
 
 The server listens on 127.0.0.1 only and answers only requests addressed to it.
-It serves only `web/` and the images under `questions/` and `overview/`.
+It serves only `web/` and the images under `questions/`, `screens/` and
+`overview/`.
 
 ## Overview images
 
@@ -292,6 +293,7 @@ config/experiment-*.yaml one per analysis aim (glm, mvpa, time-series); pick wit
 config/planner/<design>/ configs mirrored from the design planner (`planner`)
 questions/bank.json      the question bank
 questions/images/        image stimuli
+screens/                 pictures for `screens:` entries (and `fixation`)
 innerspeech/config.py    YAML loading + validation
 innerspeech/bank.py      bank loading, label balancing, jitter, run construction
 innerspeech/db.py        the JSON database (the only thing that writes to disk)
@@ -402,13 +404,28 @@ trial:
 ```
 
 A scalar `dur` is fixed; a `[lo, hi]` pair is jittered. `show` is `question`,
-`cue`, `blank`, `fixation`, or any screen under `screens:`, a line of text of
-your own:
+`cue`, `blank`, `fixation`, or any screen under `screens:`, a line of text or a
+picture of your own:
 
 ```yaml
 screens:
-  rest: {text: "·", height: 0.05, color: [0.5, 0.5, 0.5]}   # font and pos from text:
+  rest:  {text: "·", height: 0.05, color: [0.5, 0.5, 0.5]}   # font and pos from text:
+  scene: {image: screens/rest.png, height: 0.3, pos: [0, 0]}
 ```
+
+A screen needs `text` or `image`; the loader refuses one with neither. With
+`image` it shows a picture instead of a line of text:
+
+| key | what it does on an image screen |
+|---|---|
+| `image` | the file, relative to the project directory (by convention `screens/`, beside `questions/`); an absolute path also works |
+| `height` | how tall the picture is drawn, in `window.units`. Its width follows the picture's own aspect ratio |
+| `pos` | where its centre sits, as for a text screen |
+
+`text`, `color` and `font` do not apply to it. `fixation` is a screen like any
+other, so it can be a picture too (its `image` wins over the default `+`), and
+the lead-in and lead-out can `show` one. A missing file stops the run as the
+window opens, naming the screen and the path, before any scan time is used.
 
 The lead-in and lead-out are phases too. A bare number sets only the duration,
 as before; the full form sets what is on screen, what the console, the overview
@@ -472,5 +489,5 @@ is how a silent trial reads in the console and the demo.
 - Set `scanner.trigger_key` and `scanner.wait_for_triggers` (dummy volumes) for
   your site, and confirm `scanner.tr`.
 - Check `window.screen` and `window.size` against the projector.
-- Replace the placeholder images in `questions/images/`.
+- Replace the placeholder images in `questions/images/` and `screens/`.
 - Expand the question bank — a 30-session study needs far more than 80 items.

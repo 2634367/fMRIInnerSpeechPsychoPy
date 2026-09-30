@@ -258,6 +258,18 @@ def _rgb(colour):
     return colour
 
 
+def _picture(ax, image, pos, size):
+    """One picture from `imread`, centred at `pos`, `size` = (width, height) in units.
+
+    imshow crops the axes to the picture, so the screen's own limits go back on.
+    """
+    (x, y), (w, h) = pos, size
+    xlim, ylim = ax.get_xlim(), ax.get_ylim()
+    ax.imshow(image, extent=(x - w / 2, x + w / 2, y - h / 2, y + h / 2), aspect="auto")
+    ax.set_xlim(*xlim)
+    ax.set_ylim(*ylim)
+
+
 def _screen(ax, cfg, show, trial=None):
     """Draw what PsychoPy puts on screen for one phase, in `height` units."""
     w, h = cfg["window"]["size"]
@@ -282,7 +294,12 @@ def _screen(ax, cfg, show, trial=None):
     t, views = cfg["text"], cfg["views"]
     if show in cfg["screens"]:
         s = cfg["screens"][show]
-        say(s["text"], s["pos"], s["height"], s["color"], family=s["font"])
+        if s.get("image"):                 # `height` tall, width from the picture
+            image = imread(cfg.file(s["image"]))
+            width = s["height"] * image.shape[1] / image.shape[0]
+            _picture(ax, image, s["pos"], (width, s["height"]))
+        else:
+            say(s["text"], s["pos"], s["height"], s["color"], family=s["font"])
     elif show == "cue" and trial:
         say(trial["cue"], cfg["cue"]["pos"], cfg["cue"]["height"], cfg["cue"]["color"])
     elif show == "question" and trial and trial["show_question"]:
@@ -304,12 +321,8 @@ def _screen(ax, cfg, show, trial=None):
                     orientation=-radians(ori), color=colour))
         elif trial["view"] == "image":
             image = imread(cfg.path("images_dir") / params["image"])
-            iw, ih = params.get("size") or (image.shape[1] / h, image.shape[0] / h)
-            x, y = views["image"]["pos"]
-            ax.imshow(image, extent=(x - iw / 2, x + iw / 2, y - ih / 2, y + ih / 2),
-                      aspect="auto")
-            ax.set_xlim(-half, half)
-            ax.set_ylim(-0.5, 0.5)
+            size = params.get("size") or (image.shape[1] / h, image.shape[0] / h)
+            _picture(ax, image, views["image"]["pos"], size)
 
 
 def _thumb(sheet, cfg, left, top, height, show, trial, caption):

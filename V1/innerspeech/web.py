@@ -8,7 +8,7 @@ Serves `web/` and a small JSON API over the task's own code:
     GET  /api/planner/designs     the planner's designs (needs PLANNER_HOST, no key)
     POST /api/planner/refresh     {design} -> mirror it, as `planner --download` does
     POST /api/plan                {source, design?, config, seed?, blocks?} -> a run
-    GET  /files/<path>            images under questions/ and overview/
+    GET  /files/<path>            images under questions/, screens/ and overview/
 
 A run is built by `bank.build_run` from its seed, exactly as `session.Session`
 builds one, and played by the page. Nothing here starts PsychoPy or writes to
@@ -36,7 +36,7 @@ STATIC_TYPES = {".html": "text/html; charset=utf-8",
                 ".css": "text/css; charset=utf-8"}
 IMAGE_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
                ".gif": "image/gif", ".webp": "image/webp"}
-FILE_DIRS = ("questions", "overview")         # the only places /files/ reads from
+FILE_DIRS = ("questions", "screens", "overview")   # the only places /files/ reads from
 MAX_BODY = 64 * 1024
 CSP = ("default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
        "script-src 'self'; connect-src 'self'; frame-ancestors 'none'")
@@ -229,6 +229,9 @@ def plan(root, body):
     for trial in trials:
         if trial["view"] == "image":
             trial["image_url"] = file_url(images / trial["params"].get("image", ""), root)
+    for screen in cfg["screens"].values():         # a screen that shows a picture
+        if screen.get("image"):
+            screen["image_url"] = file_url(cfg.file(screen["image"]), root)
     total = sum(leads.values()) + sum(sum(t["durations"].values()) for t in trials)
     return {"seed": seed, "source": {**source, "file": _relative(path, root)},
             "cfg": dict(cfg), "trials": trials, "leads": leads, "reused": reused,

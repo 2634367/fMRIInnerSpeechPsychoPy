@@ -47,8 +47,39 @@ class Session:
         return core.getTime() - self.t0
 
     # ------------------------------------------------------------ setup ---
+    def _screen_images(self):
+        """Path and `height`-tall size of every `screens:` entry that sets `image`.
+
+        Read before the window opens, so a missing picture stops the run while
+        nothing is on screen and no scan time has been spent. A picture is drawn
+        `height` tall in window.units, its width from its own aspect ratio.
+        """
+        from PIL import Image      # ships with PsychoPy; only image screens need it
+
+        found = {}
+        for name, s in self.cfg["screens"].items():
+            if not s.get("image"):
+                continue
+            path = self.cfg.file(s["image"])
+            if not path.is_file():
+                raise FileNotFoundError(f"screen `{name}`: image not found: {path}")
+            with Image.open(path) as im:
+                pixels_w, pixels_h = im.size
+            found[name] = (path, (s["height"] * pixels_w / pixels_h, s["height"]))
+        return found
+
+    def _screen_stim(self, name, spec, images):
+        """One `screens:` entry: a picture when it sets `image`, else a line of text."""
+        if name in images:
+            path, size = images[name]
+            return visual.ImageStim(self.win, image=str(path), size=size,
+                                    pos=spec["pos"])
+        return visual.TextStim(self.win, text=spec["text"], height=spec["height"],
+                               color=spec["color"], font=spec["font"], pos=spec["pos"])
+
     def open_window(self):
         w = self.cfg["window"]
+        images = self._screen_images()          # before the window: a missing file stops here
         self.win = visual.Window(
             size=w["size"],
             fullscr=w["fullscreen"] if self.fullscreen is None else self.fullscreen,
@@ -59,12 +90,9 @@ class Session:
         self.frame_dur = self.win.monitorFramePeriod or 1.0 / w["assumed_refresh_hz"]
 
         t = self.cfg["text"]
-        # fixation and every other `screens:` entry: one line of text each
-        self.screens = {
-            name: visual.TextStim(self.win, text=s["text"], height=s["height"],
-                                  color=s["color"], font=s["font"], pos=s["pos"])
-            for name, s in self.cfg["screens"].items()
-        }
+        # fixation and every other `screens:` entry: a line of text, or a picture
+        self.screens = {name: self._screen_stim(name, s, images)
+                        for name, s in self.cfg["screens"].items()}
         c = self.cfg["cue"]
         self.cue = visual.TextStim(
             self.win, text="", height=c["height"], color=c["color"], pos=c["pos"],
